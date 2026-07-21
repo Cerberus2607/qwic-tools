@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QWIC | Händler-Tools</title>
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<style>
+  /* ============================================================
+     MACAN einbinden: Fontdateien neben diese HTML-Datei legen
+     und die Kommentare unten entfernen.
+     ============================================================
+  @font-face { font-family:'MACAN'; src:url('MACAN-Regular.woff2') format('woff2'); font-weight:400; }
+  @font-face { font-family:'MACAN'; src:url('MACAN-Bold.woff2') format('woff2'); font-weight:700; }
+  */
+
+  :root, [data-theme="dark"] {
+    --bg: #0a0a0a;
+    --field: #161616;
+    --card: #1e1e1e;
+    --line: #2e2e2e;
+    --line2: #262626;
+    --orange: #f47920;
+    --fg: #ffffff;
+    --muted: #9a9a9a;
+    --hero-bg: linear-gradient(135deg, #241a10, #1e1e1e 60%);
+    --hero-line: #4a3520;
+    --row-hover: #262014;
+    --row-active: #2b2013;
+  }
+  [data-theme="light"] {
+    --bg: #f4f2ee;
+    --field: #ffffff;
+    --card: #ffffff;
+    --line: #ddd8d0;
+    --line2: #eae6df;
+    --orange: #f47920;
+    --fg: #141414;
+    --muted: #6f6b64;
+    --hero-bg: linear-gradient(135deg, #fdf1e5, #ffffff 60%);
+    --hero-line: #f2ceac;
+    --row-hover: #faf0e4;
+    --row-active: #f7e7d3;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'MACAN', 'Macan', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+  }
+
+  /* ---------- Header ---------- */
+  header { background: #000; border-bottom: 3px solid var(--orange); padding: 24px 16px 0; text-align: center; position: relative; }
+  header svg.logo { max-width: 240px; width: 60%; height: auto; display: block; margin: 0 auto; }
+  header svg.logo .lg-m { fill: #fff; }
+  header svg.logo .lg-o { fill: #f47920; }
+  header .subtitle { margin-top: 12px; font-size: 14px; letter-spacing: 5px; text-transform: uppercase; color: #9a9a9a; }
+
+  #themeBtn {
+    position: absolute; top: 16px; right: 16px;
+    background: transparent; border: 1px solid #3a3a3a; color: #fff;
+    border-radius: 20px; padding: 7px 14px; cursor: pointer; font-family: inherit; font-size: 13px;
+  }
+  #themeBtn:hover { border-color: var(--orange); }
+
+  nav.tabs { display: flex; justify-content: center; gap: 6px; margin-top: 18px; }
+  nav.tabs button {
+    background: transparent; border: none; border-bottom: 3px solid transparent;
+    color: #9a9a9a; font-family: inherit; font-size: 13px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; padding: 12px 22px; cursor: pointer;
+  }
+  nav.tabs button.active { color: #fff; border-bottom-color: var(--orange); }
+  nav.tabs button:hover { color: #fff; }
+
+  main { max-width: 1380px; margin: 0 auto; padding: 28px 16px 60px; }
+  .tab-page { display: none; }
+  .tab-page.visible { display: block; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 1020px) { .split { grid-template-columns: 1fr; } }
+  .split .col-title { font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin: 0 0 12px 4px; }
+  .split .card { margin-bottom: 20px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  .full { grid-column: 1 / -1; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+  .card h2 { font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin-bottom: 18px; }
+  .card h3 { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 20px 0 8px; }
+
+  label { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+
+  select, input[type="number"], input[type="text"], input[type="email"], input[type="date"], textarea {
+    width: 100%; background: var(--field); border: 1px solid var(--line); border-radius: 8px;
+    color: var(--fg); font-family: inherit; font-size: 15px; padding: 10px 12px; outline: none;
+    transition: border-color .15s;
+  }
+  select:focus, input:focus, textarea:focus { border-color: var(--orange); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .row2, .row3 { grid-template-columns: 1fr; } }
+
+  /* ---------- Ergebnis ---------- */
+  .result-hero { background: var(--hero-bg); border: 1px solid var(--hero-line); border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; }
+  .result-hero .lbl { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .result-hero .val { font-size: 38px; font-weight: 700; color: var(--orange); line-height: 1.2; }
+  .result-hero .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .kv { display: flex; justify-content: space-between; padding: 9px 2px; border-bottom: 1px solid var(--line2); font-size: 15px; gap: 12px; }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .kv.total .v { color: var(--orange); font-size: 17px; }
+
+  /* ---------- Tabellen ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: right; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 400; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line2); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr.clickable { cursor: pointer; }
+  tbody tr.clickable:hover { background: var(--row-hover); }
+  tbody tr.active { background: var(--row-active); }
+  tbody tr.active td:first-child { color: var(--orange); font-weight: 700; }
+  .hek-col { color: var(--orange); font-weight: 700; }
+
+  .hint { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+
+  button.btn {
+    font-family: inherit; background: var(--orange); color: #000; border: none; border-radius: 8px;
+    font-weight: 700; font-size: 13px; letter-spacing: 1px; padding: 11px 18px; cursor: pointer; text-transform: uppercase;
+  }
+  [data-theme="light"] button.btn { color: #fff; }
+  button.btn:hover { filter: brightness(1.08); }
+  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 8px; font-family: inherit; padding: 8px 14px; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  button.ghost:hover { color: var(--fg); border-color: var(--muted); }
+  .del-btn { background: transparent; border: none; color: #888; cursor: pointer; font-size: 15px; padding: 0 4px; }
+  .del-btn:hover { color: #e5484d; }
+
+  .add-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-top: 16px; }
+  @media (max-width: 560px) { .add-row { grid-template-columns: 1fr; } }
+
+  /* ---------- Vertrag: Formular ---------- */
+  .checkline { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line2); }
+  .checkline:last-child { border-bottom: none; }
+  .checkline input[type="checkbox"], .checkline input[type="radio"] { width: 17px; height: 17px; accent-color: var(--orange); margin-top: 2px; flex-shrink: 0; }
+  .checkline .cl-body { flex: 1; font-size: 14px; line-height: 1.4; }
+  .checkline .cl-body small { color: var(--muted); display: block; }
+  .checkline .pct { width: 70px; flex-shrink: 0; }
+  .checkline .pct input { padding: 6px 8px; font-size: 13px; text-align: right; }
+
+  .staffel-grid { display: grid; grid-template-columns: 34px 1fr 1fr 80px; gap: 6px; align-items: center; margin-bottom: 4px; }
+  .staffel-grid input { padding: 6px 8px; font-size: 13px; }
+  .staffel-grid .sg-h { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+
+  /* ---------- Vertrag: Vorschau / Druck ---------- */
+  #printArea { margin-top: 20px; }
+  .sheet {
+    background: #fff; color: #1a1a1a; width: 210mm; min-height: 296mm;
+    margin: 0 auto 18px; padding: 14mm 15mm; border-radius: 4px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.35);
+    font-size: 10.5pt; line-height: 1.42; position: relative;
+  }
+  @media (max-width: 860px) { .sheet { width: 100%; min-height: auto; padding: 20px; } }
+
+  .sheet .doc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8mm; }
+  .sheet .doc-head svg { height: 34px; width: auto; }
+  .sheet .doc-title { font-size: 15pt; font-weight: 700; letter-spacing: .5px; }
+  .sheet h4.sec {
+    background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase;
+    padding: 5px 10px; margin: 7mm 0 3.5mm; border-left: 4px solid #f47920;
+  }
+  .sheet h4.sec:first-of-type { margin-top: 0; }
+  .sheet .box { border: 1px solid #ccc; border-radius: 4px; padding: 6px 9px; min-height: 34px; }
+  .sheet .box .bl { font-size: 7.5pt; letter-spacing: 1px; text-transform: uppercase; color: #888; }
+  .sheet .box .bv { font-weight: 700; min-height: 14px; }
+  .sheet .kd-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+  .sheet .kd-grid .wide { grid-column: span 1; }
+
+  .sheet table.ct { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-top: 1mm; }
+  .sheet table.ct th { color: #777; font-size: 7.5pt; letter-spacing: 1.5px; border-bottom: 1px solid #ccc; padding: 4px 8px; }
+  .sheet table.ct td { border-bottom: 1px solid #e6e6e6; padding: 5px 8px; color: #1a1a1a; }
+  .sheet table.ct tr.chosen td { background: #fdeedd; font-weight: 700; }
+  .sheet table.ct tr.chosen td:first-child { color: #f47920; }
+
+  .sheet ul { margin: 1mm 0 0 5mm; }
+  .sheet li { margin-bottom: 1mm; }
+  .sheet .pct-line { display: flex; justify-content: space-between; gap: 8mm; border-bottom: 1px solid #e6e6e6; padding: 2.5mm 1mm; }
+  .sheet .pct-line:last-child { border-bottom: none; }
+  .sheet .pct-line .p { font-weight: 700; white-space: nowrap; }
+  .sheet .total-marge { background: #000; color: #fff; display: flex; justify-content: space-between; padding: 3mm 4mm; margin-top: 3mm; font-weight: 700; }
+  .sheet .total-marge span:last-child { color: #f47920; }
+  .sheet .note-sm { font-size: 8pt; color: #666; margin-top: 2mm; }
+  .sheet .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 10mm; }
+  .sheet .sig { border-top: 1px solid #333; padding-top: 2mm; font-size: 8.5pt; color: #444; }
+  .sheet .sig .sig-name { font-weight: 700; font-size: 10pt; color: #000; min-height: 12pt; }
+  .sheet .legal { column-count: 2; column-gap: 8mm; font-size: 7.4pt; line-height: 1.45; color: #333; text-align: justify; }
+  .sheet .legal h5 { font-size: 7.8pt; margin: 2mm 0 1mm; }
+  .sheet .foot { position: absolute; bottom: 8mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; font-size: 7pt; color: #999; letter-spacing: 1px; }
+  @media (max-width: 860px) { .sheet .foot { position: static; margin-top: 10mm; } }
+
+  .contract-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 2px; padding: 20px; text-transform: uppercase; }
+
+  /* ---------- Druck: nur Vertrag ---------- */
+  @media print {
+    @page { size: A4; margin: 0; }
+    #printArea { zoom: 1 !important; }
+    body { background: #fff; }
+    header, footer, .no-print, #previewTitle { display: none !important; }
+    .tab-page { display: none !important; }
+    #tab-contract { display: block !important; }
+    #tab-calc { display: none !important; }
+    main { max-width: none; padding: 0; }
+    #printArea { margin: 0; }
+    .sheet { width: 210mm; min-height: 296mm; margin: 0; padding: 14mm 15mm; border-radius: 0; box-shadow: none; page-break-after: always; }
+    .sheet:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button id="themeBtn" class="no-print" title="Hell/Dunkel umschalten">☀ Hell</button>
+  <!-- QWIC Wortmarke mit X-Muster (SVG-Nachbau des Banners) -->
+  <svg class="logo" viewBox="247 498 721 182" xmlns="http://www.w3.org/2000/svg" aria-label="QWIC"><path class="lg-m" d="M 278.921874667,498.880208 C 261.526041333,498.880208 247.453125333,512.958333333 247.453125333,530.343749333 L 247.453125333,648.343749333 C 247.453125333,665.734374667 261.526041333,679.807292 278.921874667,679.807292 L 376.036458667,679.807292 L 336.708333333,640.479166667 L 294.651041333,640.479166667 C 290.296874667,640.479166667 286.781250667,636.958333333 286.781250667,632.609374667 L 286.781250667,546.078125333 C 286.781250667,541.729166667 290.296874667,538.213541333 294.651041333,538.213541333 L 396.911458667,538.213541333 C 401.260416,538.213541333 404.776041333,541.729166667 404.776041333,546.078125333 L 404.776041333,619.5 L 444.109374667,658.828125333 L 444.109374667,530.348958667 C 444.109374667,512.958333333 430.036458667,498.880208 412.645833333,498.880208 Z M 278.921874667,498.880208"/><path class="lg-m" d="M 483.838541333,680.036458666 L 679.052082666,680.036458666 C 696.447917333,680.036458666 710.520833333,665.963541333 710.520833333,648.572917333 L 710.520833333,499.114584 L 671.1875,499.114584 L 671.1875,632.843749333 C 671.1875,637.1875 667.666666666,640.708333333 663.317708,640.708333333 L 612.1875,640.708333333 L 612.1875,499.114584 L 572.859374667,499.114584 L 572.859374667,640.708333333 L 513.864584,640.708333333 L 513.864584,499.114584 L 474.526041333,499.114584 L 474.526041333,680.036458666 Z M 483.838541333,680.036458666"/><path class="lg-m" d="M 741.031250666,679.411458666 L 780.359374666,679.411458666 L 780.359374666,498.489584 L 741.031250666,498.489584 Z M 741.031250666,679.411458666"/><path class="lg-m" d="M 850.109374666,546.1875 C 850.109374666,541.843749333 853.625,538.322917333 857.973958666,538.322917333 L 968.098958666,538.322917333 L 968.098958666,498.994792 L 842.239584,498.994792 C 824.848958666,498.994792 810.776041333,513.067708 810.776041333,530.458333333 L 810.776041333,648.447917333 C 810.776041333,665.843749333 824.848958666,679.916666666 842.239584,679.916666666 L 968.098958666,679.916666666 L 968.098958666,640.583333333 L 857.973958666,640.583333333 C 853.625,640.583333333 850.109374666,637.067708 850.109374666,632.718749333 Z M 850.109374666,546.1875"/><path class="lg-o" d="M 342.151041333,625.104166667 L 391.348958667,674.302082666 C 394.416666667,677.369792 400.473958667,679.875 404.8125,679.875 L 436.354166667,679.875 C 440.6875,679.875 441.729166667,677.369792 438.661458667,674.302082666 L 389.463541333,625.104166667 C 386.395833333,622.036458667 380.338541333,619.526041333 376.005208,619.526041333 L 344.463541333,619.526041333 C 340.125,619.526041333 339.083333333,622.036458667 342.151041333,625.104166667"/></svg>
+  <div class="subtitle">Händler-Tools</div>
+  <nav class="tabs no-print">
+    <button id="tabBtnContract" class="active">Vertragserstellung 2027</button>
+    <button id="tabBtnCalc">Kalkulationstool</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============================================================ VERTRAG (Tab links) -->
+<section id="tab-contract" class="tab-page visible">
+  <div class="grid">
+
+
+    <div class="card no-print">
+      <h2>Kundendaten</h2>
+      <div class="row2">
+        <div><label>Kundennummer</label><input type="text" id="c_kdnr"></div>
+        <div><label>Händlername</label><input type="text" id="c_haendler"></div>
+      </div>
+      <div class="row2">
+        <div><label>E-Mail</label><input type="email" id="c_email"></div>
+        <div><label>Stadt</label><input type="text" id="c_stadt"></div>
+      </div>
+      <div class="row2">
+        <div><label>Geschäftsführer</label><input type="text" id="c_gf"></div>
+        <div><label>Jahresziel Umsatz netto (€, optional)</label><input type="number" id="c_ziel" min="0" step="500"></div>
+      </div>
+
+      <h3>Händlerschaft</h3>
+      <div class="checkline"><input type="radio" name="htyp" id="ht_xl" value="xl"><div class="cl-body"><strong>XL Händler</strong><small>6 Modelle im Verkaufsraum, 30 Räder/Filiale, bis zu 8 Demo-Bikes mit 7 %, Dealerfinder + Landingpage</small></div></div>
+      <div class="checkline"><input type="radio" name="htyp" id="ht_std" value="std" checked><div class="cl-body"><strong>Händler</strong><small>4 Modelle im Verkaufsraum, 10 Räder/Filiale, bis zu 5 Demo-Bikes mit 7 %, Dealerfinder + Landingpage</small></div></div>
+      <div class="checkline"><input type="radio" name="htyp" id="ht_sp" value="sp"><div class="cl-body"><strong>Servicepartner</strong><small>Website-Erwähnung, Dealer-Portal für Ersatzteile, SEPA 14 Tage ohne Skonto</small></div></div>
+
+      <h3>Marge</h3>
+      <div class="checkline"><input type="radio" name="mmode" id="mm_frei" value="frei" checked><div class="cl-body"><strong>Freie Marge</strong><small>Marge wird direkt vereinbart — keine Umsatzstaffel im Vertrag</small></div><div class="pct"><input type="number" id="c_freiMarge" value="35" step="0.5" min="0" max="99" title="Marge %"></div></div>
+      <div class="checkline"><input type="radio" name="mmode" id="mm_staffel" value="staffel"><div class="cl-body"><strong>Margenstaffel</strong><small>Klassische Staffel A–E nach Umsatz</small></div></div>
+      <div id="staffelBlock">
+        <div id="staffelEditor" style="margin-top:8px;">
+          <div class="staffel-grid">
+            <span class="sg-h"></span><span class="sg-h">Umsatz von–bis (€)</span><span class="sg-h">&nbsp;</span><span class="sg-h">Marge %</span>
+          </div>
+        </div>
+        <label>Vereinbarte Staffel</label>
+        <select id="c_staffelSel">
+          <option value="-1">Keine Staffel festlegen</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card no-print">
+      <h2>Konditionen &amp; Boni</h2>
+
+      <h3>KPI</h3>
+      <div class="checkline"><input type="checkbox" id="k_pos" checked><div class="cl-body">Markenpräsenz: Erstbestellung mind. 4 Fahrräder inkl. POS-Material</div><div class="pct"><input type="number" id="k_pos_p" value="0" step="0.5" min="0" title="+ KPI %"></div></div>
+      <div class="checkline"><input type="checkbox" id="k_vor" checked><div class="cl-body">Planung: Bis 31.12.2026 mind. 30 % des Umsatzziels als Vorbestellung bis 01.09.2027</div><div class="pct"><input type="number" id="k_vor_p" value="1" step="0.5" min="0"></div></div>
+      <div class="checkline"><input type="checkbox" id="k_aus" checked><div class="cl-body">Planung: Bis 01.07.2027 mind. 40 % des Umsatzziels ausgeliefert</div><div class="pct"><input type="number" id="k_aus_p" value="1" step="0.5" min="0"></div></div>
+
+      <h3>Zahlungsbedingungen</h3>
+      <div class="checkline"><input type="checkbox" id="k_sepa" checked><div class="cl-body">Zahlung per automatischem Lastschrifteinzug innerhalb von 14 Tagen</div><div class="pct"><input type="number" id="k_sepa_p" value="1" step="0.5" min="0"></div></div>
+
+      <h3>Bonus</h3>
+      <div class="checkline"><input type="checkbox" id="b_brekr" checked><div class="cl-body"><strong>Brekr Bonus</strong><small>Mind. 5 Brekr-Räder in 2027 geliefert</small></div><div class="pct"><input type="number" id="b_brekr_p" value="1" step="0.5" min="0"></div></div>
+
+      <h3>Demo-Modelle</h3>
+      <div class="checkline"><input type="checkbox" id="d_demo" checked><div class="cl-body">7 % Rabatt auf Demo-Modelle (Anzahl je nach Händlerschaft)</div></div>
+      <div class="checkline"><input type="checkbox" id="d_brekr"><div class="cl-body">7 % Rabatt auf maximal 2 verschiedene Brekr-Modelle</div></div>
+
+      <h3>Abschluss</h3>
+      <div class="row2">
+        <div><label>Datum</label><input type="date" id="c_datum"></div>
+        <div><label>Ort</label><input type="text" id="c_ort"></div>
+      </div>
+      <div class="row2">
+        <div><label>Name Händler (Unterzeichner)</label><input type="text" id="c_signH"></div>
+        <div><label>Name Vertriebsvertreter</label><input type="text" id="c_signV"></div>
+      </div>
+      <label>Notizen (optional)</label>
+      <textarea id="c_notes" placeholder="Erscheint nur im PDF, wenn ausgefüllt"></textarea>
+
+      <div class="checkline" style="margin-top:12px;"><input type="checkbox" id="c_legal" checked><div class="cl-body">Rechtstext (Vertragsbedingungen, Seite 3) anhängen</div></div>
+
+      <div class="contract-actions">
+        <button class="btn" id="pdfBtn">PDF erstellen</button>
+        <span class="hint" style="margin:0;">Öffnet den Druckdialog → dort „Als PDF sichern“. Nicht angehakte Optionen erscheinen nicht im PDF. iPad: falls kein Dialog erscheint, Seite in Safari öffnen → Teilen → Drucken.</span>
+      </div>
+    </div>
+
+    <div class="full">
+      <div class="col-title" id="previewTitle" style="font-size:13px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin:0 0 12px 4px;">Vertragsvorschau</div>
+      <div id="printArea"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ KALKULATION (Tab rechts) -->
+<section id="tab-calc" class="tab-page">
+  <div class="grid">
+
+
+    <div class="card">
+      <h2>Kalkulation</h2>
+
+      <label for="modelSelect">Modell</label>
+      <select id="modelSelect"></select>
+
+      <label for="akkuSelect">Akku</label>
+      <select id="akkuSelect"></select>
+
+      <div class="row2">
+        <div>
+          <label for="uvp">UVP Rad brutto (€)</label>
+          <input type="number" id="uvp" min="0" step="1" value="2999">
+        </div>
+        <div>
+          <label for="akkuPreis">Akku-Aufpreis brutto (€)</label>
+          <input type="number" id="akkuPreis" min="0" step="1" value="0">
+        </div>
+      </div>
+
+      <div class="row3">
+        <div>
+          <label for="marge">Händlermarge (%)</label>
+          <input type="number" id="marge" min="0" max="99" step="0.5" value="26">
+        </div>
+        <div>
+          <label for="kpi">KPI-Zuschlag (%)</label>
+          <input type="number" id="kpi" min="0" max="20" step="0.5" value="0">
+        </div>
+        <div>
+          <label for="menge">Stückzahl</label>
+          <input type="number" id="menge" min="1" step="1" value="1">
+        </div>
+      </div>
+
+      <div class="row3">
+        <div>
+          <label for="margenListe">Margen-Vergleich (%)</label>
+          <input type="text" id="margenListe" value="26, 28, 30, 31, 32, 34">
+        </div>
+        <div>
+          <label for="sepaP">SEPA-Abzug (%)</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="sepaOn" checked style="width:18px; height:18px; accent-color:var(--orange); flex-shrink:0;">
+            <input type="number" id="sepaP" min="0" max="10" step="0.5" value="1">
+          </div>
+        </div>
+        <div>
+          <label for="demoP">Demo-Bike-Rabatt (%)</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="demoOn" style="width:18px; height:18px; accent-color:var(--orange); flex-shrink:0;">
+            <input type="number" id="demoP" min="0" max="20" step="0.5" value="7">
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">
+        Rechenweg: <strong>Marge + KPI = Marge X</strong> → HEK = ((UVP + Akku) ÷ 1,19) × (1 − Marge X)
+        → vom Ergebnis <strong>− SEPA-Abzug</strong> → vom Ergebnis <strong>− Demo-Rabatt</strong> (nur Demo-Bikes).
+        Alle HEK netto. Akku-Aufpreis erhöht die UVP und wird mitrabattiert.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Ergebnis</h2>
+      <div class="result-hero">
+        <div class="lbl">HEK pro Stück (netto)</div>
+        <div class="val" id="hekOut">–</div>
+        <div class="sub" id="hekSub"></div>
+      </div>
+      <div class="kv"><span class="k">UVP gesamt brutto (Rad + Akku)</span><span class="v" id="uvpBrutto">–</span></div>
+      <div class="kv"><span class="k">UVP gesamt netto (÷ 1,19)</span><span class="v" id="uvpNetto">–</span></div>
+      <div class="kv"><span class="k" id="margeXLabel">HEK nach Marge X</span><span class="v" id="hekMarge">–</span></div>
+      <div class="kv"><span class="k" id="sepaLabel">./. SEPA-Abzug</span><span class="v" id="hekSepa">–</span></div>
+      <div class="kv"><span class="k" id="demoLabel">./. Demo-Rabatt</span><span class="v" id="hekDemo">–</span></div>
+      <div class="kv"><span class="k">Margenbetrag pro Stück (netto)</span><span class="v" id="margeBetrag">–</span></div>
+      <div class="kv"><span class="k">HEK brutto pro Stück (× 1,19)</span><span class="v" id="hekBrutto">–</span></div>
+      <div class="kv total"><span class="k" id="sumLabel">Bestellsumme HEK netto</span><span class="v" id="hekSumme">–</span></div>
+      <div class="kv"><span class="k">Bestellsumme HEK brutto</span><span class="v" id="hekSummeBrutto">–</span></div>
+    </div>
+
+    <div class="card full">
+      <h2>Margen-Vergleich</h2>
+      <div style="overflow-x:auto;">
+        <table id="margenTable">
+          <thead><tr><th>Marge</th><th>UVP netto</th><th>HEK / Stück</th><th>Margenbetrag / Stück</th><th id="thSumme">Summe (netto)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Bezieht sich auf UVP inkl. gewähltem Akku-Upgrade und aktuelle Stückzahl. Margen frei anpassbar (Komma-getrennt).</p>
+    </div>
+
+    <div class="card full">
+      <h2>Modellübersicht <span id="modelMargeInfo" style="color:var(--muted); font-weight:400; letter-spacing:1px; text-transform:none;"></span></h2>
+      <div style="overflow-x:auto;">
+        <table id="modelTable">
+          <thead><tr><th>Modell</th><th>Akku Standard</th><th>Upgrade</th><th>UVP brutto</th><th>UVP netto</th><th>HEK netto</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="add-row">
+        <input type="text" id="newName" placeholder="Modellname">
+        <input type="number" id="newUvp" placeholder="UVP €" min="0" step="1">
+        <input type="number" id="newUpgrade" placeholder="Akku-Upgrade € (optional)" min="0" step="1">
+        <button class="btn" id="addBtn">+ Hinzufügen</button>
+      </div>
+      <p class="hint">
+        Quelle: QWIC Dealer Workbook 2026 (Kollektion &amp; Akku-Preise). Zeile anklicken = Modell übernehmen.
+        UVP und Upgrade-Preis direkt editierbar, wird lokal im Browser gespeichert.
+        <button class="ghost" id="resetBtn" style="padding:4px 10px; font-size:11px;">Liste zurücksetzen</button>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer>QWIC Händler-Kalkulation · HEK = (UVP ÷ 1,19) × (1 − Marge)</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ================= Daten (QWIC Dealer Workbook 2026) =================
+  var DEFAULT_MODELS = [
+    { name: 'Atlas Track',     uvp: 3699, akku: '756 Wh', upLabel: null,     upPrice: 0 },
+    { name: 'Atlas Tour',      uvp: 3999, akku: '756 Wh', upLabel: null,     upPrice: 0 },
+    { name: 'Mira Daily',      uvp: 3199, akku: '756 Wh', upLabel: null,     upPrice: 0 },
+    { name: 'Mira Tour',       uvp: 3699, akku: '756 Wh', upLabel: null,     upPrice: 0 },
+    { name: 'Elan Daily',      uvp: 2999, akku: '500 Wh', upLabel: '625 Wh', upPrice: 200 },
+    { name: 'Elan Flow',       uvp: 3299, akku: '500 Wh', upLabel: '625 Wh', upPrice: 200 },
+    { name: 'Elan Tour',       uvp: 3599, akku: '500 Wh', upLabel: '625 Wh', upPrice: 200 },
+    { name: 'Inter Essential', uvp: 1799, akku: '400 Wh', upLabel: '540 Wh', upPrice: 200 },
+    { name: 'Inter Plus',      uvp: 2599, akku: '400 Wh', upLabel: '540 Wh', upPrice: 200 },
+    { name: 'Inter Tour',      uvp: 2799, akku: '400 Wh', upLabel: '540 Wh', upPrice: 200 },
+    { name: 'Echo Daily',      uvp: 2299, akku: '500 Wh', upLabel: '756 Wh', upPrice: 200 },
+    { name: 'Signal',          uvp: 2399, akku: '360 Wh', upLabel: null,     upPrice: 0 }
+  ];
+  var DEFAULT_STAFFELN = [
+    { s: 'A', von: 5000,   bis: 25000,  marge: 26 },
+    { s: 'B', von: 25001,  bis: 60000,  marge: 28 },
+    { s: 'C', von: 60001,  bis: 90000,  marge: 30 },
+    { s: 'D', von: 90001,  bis: 125000, marge: 31 },
+    { s: 'E', von: 125001, bis: null,   marge: 32 }
+  ];
+
+  var MODEL_KEY = 'qwic-hek-models-v2';
+  var THEME_KEY = 'qwic-theme';
+
+  function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+  function load(key) { try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+
+  var models = (function () {
+    var m = load(MODEL_KEY);
+    return (Array.isArray(m) && m.length) ? m : DEFAULT_MODELS.map(function (x) { return Object.assign({}, x); });
+  })();
+  var staffeln = DEFAULT_STAFFELN.map(function (x) { return Object.assign({}, x); });
+  var selectedIndex = -1;
+
+  var euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
+  var pct = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 });
+  function $(id) { return document.getElementById(id); }
+  function num(id) { var v = parseFloat(String($(id).value).replace(',', '.')); return isFinite(v) ? v : 0; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function hek(uvp, m) { return Math.round((uvp / 1.19) * (1 - m / 100) * 100) / 100; }
+
+  // ================= Theme =================
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    $('themeBtn').textContent = t === 'dark' ? '☀ Hell' : '☾ Dunkel';
+    store(THEME_KEY, t);
+  }
+  $('themeBtn').addEventListener('click', function () {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  applyTheme(load(THEME_KEY) || 'dark');
+
+  // ================= Tabs =================
+  function showTab(which) {
+    $('tab-contract').classList.toggle('visible', which === 'contract');
+    $('tab-calc').classList.toggle('visible', which === 'calc');
+    $('tabBtnContract').classList.toggle('active', which === 'contract');
+    $('tabBtnCalc').classList.toggle('active', which === 'calc');
+    if (which === 'contract') { renderContract(); }
+  }
+  $('tabBtnContract').addEventListener('click', function () { showTab('contract'); });
+  $('tabBtnCalc').addEventListener('click', function () { showTab('calc'); });
+
+  // ================= Kalkulation =================
+  function renderSelect() {
+    var sel = $('modelSelect');
+    sel.innerHTML = '<option value="-1">Manuelle Eingabe</option>';
+    models.forEach(function (m, i) {
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = m.name + ' — ' + euro.format(m.uvp);
+      sel.appendChild(o);
+    });
+    sel.value = String(selectedIndex);
+    renderAkkuSelect();
+  }
+
+  function renderAkkuSelect() {
+    var sel = $('akkuSelect');
+    sel.innerHTML = '';
+    var m = selectedIndex >= 0 ? models[selectedIndex] : null;
+    if (m) {
+      var o1 = document.createElement('option');
+      o1.value = '0';
+      o1.textContent = 'Standard ' + (m.akku || '') + ' (inklusive)';
+      sel.appendChild(o1);
+      if (m.upLabel && m.upPrice > 0) {
+        var o2 = document.createElement('option');
+        o2.value = String(m.upPrice);
+        o2.textContent = 'Upgrade ' + m.upLabel + ' (+' + euro.format(m.upPrice) + ')';
+        sel.appendChild(o2);
+      }
+      sel.disabled = false;
+    } else {
+      var o = document.createElement('option');
+      o.value = '0';
+      o.textContent = 'Manuell: Aufpreis rechts eintragen';
+      sel.appendChild(o);
+      sel.disabled = false;
+    }
+    $('akkuPreis').value = 0;
+  }
+
+  function chainFactors() {
+    var margeX = num('marge') + num('kpi');
+    var sepa = $('sepaOn').checked ? num('sepaP') : 0;
+    var demo = $('demoOn').checked ? num('demoP') : 0;
+    return { margeX: margeX, sepa: sepa, demo: demo };
+  }
+  function hekChain(uvp, margeX, sepa, demo) {
+    var v = Math.round((uvp / 1.19) * (1 - margeX / 100) * 100) / 100;
+    v = Math.round(v * (1 - sepa / 100) * 100) / 100;
+    v = Math.round(v * (1 - demo / 100) * 100) / 100;
+    return v;
+  }
+
+  function calc() {
+    var uvpRad = num('uvp');
+    var akku = num('akkuPreis');
+    var uvp = uvpRad + akku;
+    var menge = Math.max(1, Math.round(num('menge')) || 1);
+    var f = chainFactors();
+    var uvpNet = uvp / 1.19;
+    var h1 = Math.round(uvpNet * (1 - f.margeX / 100) * 100) / 100;
+    var h2 = Math.round(h1 * (1 - f.sepa / 100) * 100) / 100;
+    var h = Math.round(h2 * (1 - f.demo / 100) * 100) / 100;
+    var hBrut = Math.round(h * 1.19 * 100) / 100;
+
+    $('hekOut').textContent = uvp > 0 ? euro.format(h) : '–';
+    $('hekSub').textContent = uvp > 0
+      ? 'Marge X = ' + pct.format(f.margeX) + ' %'
+        + (f.sepa > 0 ? ' · − ' + pct.format(f.sepa) + ' % SEPA' : '')
+        + (f.demo > 0 ? ' · − ' + pct.format(f.demo) + ' % Demo' : '')
+        + ' auf ' + euro.format(uvp) + (akku > 0 ? ' (inkl. Akku +' + euro.format(akku) + ')' : '')
+      : '';
+    $('uvpBrutto').textContent = euro.format(uvp);
+    $('uvpNetto').textContent = euro.format(uvpNet);
+    $('margeXLabel').textContent = 'HEK nach Marge X (' + pct.format(f.margeX) + ' %)';
+    $('hekMarge').textContent = euro.format(h1);
+    $('sepaLabel').textContent = './. SEPA-Abzug (' + pct.format(f.sepa) + ' %)';
+    $('hekSepa').textContent = f.sepa > 0 ? euro.format(h2) : '—';
+    $('demoLabel').textContent = './. Demo-Rabatt (' + pct.format(f.demo) + ' %)';
+    $('hekDemo').textContent = f.demo > 0 ? euro.format(h) : '—';
+    $('margeBetrag').textContent = euro.format(Math.round((uvpNet - h) * 100) / 100);
+    $('hekBrutto').textContent = euro.format(hBrut);
+    $('sumLabel').textContent = 'Bestellsumme HEK netto (' + menge + ' Stk.)';
+    $('hekSumme').textContent = euro.format(h * menge);
+    $('hekSummeBrutto').textContent = euro.format(Math.round(hBrut * menge * 100) / 100);
+
+    renderMargenTable(uvp, menge, f);
+    renderModelTable(f);
+  }
+
+  function parseMargen() {
+    return String($('margenListe').value).split(/[,;]/)
+      .map(function (s) { return parseFloat(s.trim().replace(',', '.')); })
+      .filter(function (v) { return isFinite(v) && v >= 0 && v < 100; });
+  }
+
+  function renderMargenTable(uvp, menge, f) {
+    var tb = $('margenTable').querySelector('tbody');
+    $('thSumme').textContent = 'Summe netto (' + menge + ' Stk.)';
+    tb.innerHTML = '';
+    parseMargen().forEach(function (m) {
+      var hk = hekChain(uvp, m, f.sepa, f.demo);
+      var uvpNet = uvp / 1.19;
+      var tr = document.createElement('tr');
+      if (Math.abs(m - f.margeX) < 0.001) tr.className = 'active';
+      tr.innerHTML = '<td>' + pct.format(m) + ' %</td><td>' + euro.format(uvpNet) + '</td>' +
+        '<td class="hek-col">' + euro.format(hk) + '</td>' +
+        '<td>' + euro.format(Math.round((uvpNet - hk) * 100) / 100) + '</td>' +
+        '<td>' + euro.format(hk * menge) + '</td>';
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderModelTable(f) {
+    $('modelMargeInfo').textContent = '· HEK bei Marge X ' + pct.format(f.margeX) + ' %' + (f.sepa > 0 ? ' − ' + pct.format(f.sepa) + ' % SEPA' : '') + (f.demo > 0 ? ' − ' + pct.format(f.demo) + ' % Demo' : '');
+    var tb = $('modelTable').querySelector('tbody');
+    tb.innerHTML = '';
+    models.forEach(function (m, i) {
+      var tr = document.createElement('tr');
+      tr.className = 'clickable' + (i === selectedIndex ? ' active' : '');
+
+      var tdName = document.createElement('td'); tdName.textContent = m.name;
+      var tdAkku = document.createElement('td'); tdAkku.textContent = m.akku || '–'; tdAkku.style.color = 'var(--muted)';
+
+      var tdUp = document.createElement('td');
+      if (m.upLabel) {
+        var upIn = document.createElement('input');
+        upIn.type = 'number'; upIn.min = '0'; upIn.step = '10'; upIn.value = m.upPrice;
+        upIn.style.cssText = 'width:80px; text-align:right; padding:5px 6px; font-size:13px;';
+        upIn.title = 'Aufpreis ' + m.upLabel;
+        upIn.addEventListener('click', function (e) { e.stopPropagation(); });
+        upIn.addEventListener('change', function () {
+          var v = parseFloat(upIn.value);
+          if (isFinite(v) && v >= 0) { m.upPrice = v; store(MODEL_KEY, models); renderAkkuSelect(); calc(); }
+        });
+        var wrap = document.createElement('span');
+        wrap.textContent = m.upLabel + ' ';
+        tdUp.appendChild(wrap); tdUp.appendChild(upIn);
+      } else { tdUp.textContent = '–'; tdUp.style.color = 'var(--muted)'; }
+
+      var tdUvp = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number'; inp.min = '0'; inp.step = '1'; inp.value = m.uvp;
+      inp.style.cssText = 'width:100px; text-align:right; padding:5px 6px; font-size:13px;';
+      inp.addEventListener('click', function (e) { e.stopPropagation(); });
+      inp.addEventListener('change', function () {
+        var v = parseFloat(inp.value);
+        if (isFinite(v) && v >= 0) {
+          m.uvp = v; store(MODEL_KEY, models);
+          if (i === selectedIndex) $('uvp').value = v;
+          renderSelect(); calc();
+        }
+      });
+      tdUvp.appendChild(inp);
+
+      var tdNet = document.createElement('td'); tdNet.textContent = euro.format(m.uvp / 1.19);
+      var tdHek = document.createElement('td'); tdHek.className = 'hek-col'; tdHek.textContent = euro.format(hekChain(m.uvp, f.margeX, f.sepa, f.demo));
+
+      var tdDel = document.createElement('td');
+      var del = document.createElement('button'); del.className = 'del-btn'; del.title = 'Entfernen'; del.textContent = '✕';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        models.splice(i, 1);
+        if (selectedIndex === i) selectedIndex = -1; else if (selectedIndex > i) selectedIndex--;
+        store(MODEL_KEY, models); renderSelect(); calc();
+      });
+      tdDel.appendChild(del);
+
+      [tdName, tdAkku, tdUp, tdUvp, tdNet, tdHek, tdDel].forEach(function (td) { tr.appendChild(td); });
+      tr.addEventListener('click', function () {
+        selectedIndex = i; $('uvp').value = m.uvp;
+        renderSelect(); calc();
+      });
+      tb.appendChild(tr);
+    });
+  }
+
+  $('modelSelect').addEventListener('change', function () {
+    selectedIndex = parseInt(this.value, 10);
+    if (selectedIndex >= 0 && models[selectedIndex]) $('uvp').value = models[selectedIndex].uvp;
+    renderAkkuSelect(); calc();
+  });
+  $('akkuSelect').addEventListener('change', function () {
+    $('akkuPreis').value = parseFloat(this.value) || 0;
+    calc();
+  });
+
+  ['sepaOn', 'demoOn'].forEach(function (id) { $(id).addEventListener('change', calc); });
+  ['uvp', 'akkuPreis', 'marge', 'kpi', 'sepaP', 'demoP', 'menge', 'margenListe'].forEach(function (id) {
+    $(id).addEventListener('input', function () {
+      if (id === 'uvp' && selectedIndex >= 0 && models[selectedIndex] && num('uvp') !== models[selectedIndex].uvp) {
+        selectedIndex = -1; renderSelect();
+      }
+      calc();
+    });
+  });
+
+  $('addBtn').addEventListener('click', function () {
+    var name = $('newName').value.trim();
+    var uvp = parseFloat($('newUvp').value);
+    var up = parseFloat($('newUpgrade').value);
+    if (!name || !isFinite(uvp) || uvp <= 0) return;
+    models.push({ name: name, uvp: uvp, akku: '', upLabel: (isFinite(up) && up > 0) ? 'Upgrade' : null, upPrice: (isFinite(up) && up > 0) ? up : 0 });
+    $('newName').value = ''; $('newUvp').value = ''; $('newUpgrade').value = '';
+    store(MODEL_KEY, models); renderSelect(); calc();
+  });
+
+  $('resetBtn').addEventListener('click', function () {
+    if (!confirm('Modell-Liste auf die Workbook-Standardwerte zurücksetzen?')) return;
+    models = DEFAULT_MODELS.map(function (x) { return Object.assign({}, x); });
+    selectedIndex = -1;
+    store(MODEL_KEY, models); renderSelect(); calc();
+  });
+
+  // ================= Vertrag 2027 =================
+  // Staffel-Editor
+  (function buildStaffelEditor() {
+    var host = $('staffelEditor');
+    staffeln.forEach(function (st, i) {
+      var row = document.createElement('div');
+      row.className = 'staffel-grid';
+      var lab = document.createElement('strong'); lab.textContent = st.s;
+      var von = document.createElement('input'); von.type = 'number'; von.value = st.von; von.min = '0';
+      var bis = document.createElement('input'); bis.type = 'number'; bis.placeholder = 'offen'; if (st.bis !== null) bis.value = st.bis;
+      var mg = document.createElement('input'); mg.type = 'number'; mg.value = st.marge; mg.step = '0.5'; mg.min = '0';
+      von.addEventListener('input', function () { st.von = parseFloat(von.value) || 0; renderContract(); });
+      bis.addEventListener('input', function () { var v = parseFloat(bis.value); st.bis = isFinite(v) ? v : null; renderContract(); });
+      mg.addEventListener('input', function () { st.marge = parseFloat(mg.value) || 0; renderContract(); });
+      row.appendChild(lab); row.appendChild(von); row.appendChild(bis); row.appendChild(mg);
+      host.appendChild(row);
+      var opt = document.createElement('option');
+      opt.value = String(i); opt.textContent = 'Staffel ' + st.s + ' (' + st.marge + ' %)';
+      $('c_staffelSel').appendChild(opt);
+    });
+  })();
+
+  // Margen-Modus: Staffel-Block ein-/ausblenden
+  function syncMargenMode() {
+    $('staffelBlock').style.display = $('mm_staffel').checked ? '' : 'none';
+  }
+  $('mm_frei').addEventListener('change', function () { syncMargenMode(); renderContract(); });
+  $('mm_staffel').addEventListener('change', function () { syncMargenMode(); renderContract(); });
+  syncMargenMode();
+
+  function fitPreview() {
+    var pa = $('printArea');
+    if (!pa || !pa.parentElement) return;
+    var cw = pa.parentElement.clientWidth;
+    var z = Math.min(1, cw / 800); // 210mm ~ 794px @96dpi
+    pa.style.zoom = z;
+  }
+  window.addEventListener('resize', fitPreview);
+
+  var contractInputs = ['c_kdnr','c_haendler','c_email','c_stadt','c_gf','c_ziel','c_freiMarge','c_staffelSel',
+    'k_pos','k_pos_p','k_vor','k_vor_p','k_aus','k_aus_p','k_sepa','k_sepa_p',
+    'b_brekr','b_brekr_p',
+    'd_demo','d_brekr','c_datum','c_ort','c_signH','c_signV','c_notes','c_legal',
+    'ht_xl','ht_std','ht_sp'];
+  contractInputs.forEach(function (id) {
+    var el = $(id);
+    if (el) { el.addEventListener('input', renderContract); el.addEventListener('change', renderContract); }
+  });
+
+  function checked(id) { return $(id).checked; }
+  function val(id) { return $(id).value.trim(); }
+
+  function boxHtml(label, value, style) {
+    return '<div class="box"' + (style ? ' style="' + style + '"' : '') + '><div class="bl">' + label + '</div><div class="bv">' + esc(value || '') + '&nbsp;</div></div>';
+  }
+
+  var HTYP_BLOCKS = {
+    xl: { title: 'XL Händler', items: [
+      'Zur Listung als QWIC XL-Händler sind jährlich mindestens sechs (6) Modelle im Verkaufsraum zu präsentieren und dreißig (30) Fahrräder pro Filiale zu beziehen.',
+      'Es können bis zu acht (8) Demo-Bikes mit 7 % Rabatt sowie ein einmaliges „Ride Your Style“ Demo-Set erworben werden.',
+      'Die Marge richtet sich nach den vereinbarten Jahreszielen.',
+      'Es erfolgt die Erwähnung im Dealerfinder auf der QWIC-Website sowie die Einrichtung einer eigenen Landingpage auf der QWIC-Website.'
+    ]},
+    std: { title: 'Händler', items: [
+      'Zur Listung als QWIC-Händler sind jährlich mindestens vier (4) Modelle im Verkaufsraum zu präsentieren und zehn (10) Fahrräder pro Filiale zu beziehen.',
+      'Es können bis zu fünf (5) Demo-Bikes mit 7 % Rabatt erworben werden.',
+      'Die Marge richtet sich nach den vereinbarten Jahreszielen.',
+      'Es erfolgt die Erwähnung im Dealerfinder auf der QWIC-Website sowie die Einrichtung einer eigenen Landingpage auf der QWIC-Website.'
+    ]},
+    sp: { title: 'Servicepartner', items: [
+      'Es erfolgt die Erwähnung als Servicepartner auf der QWIC-Website.',
+      'Servicepartner erhalten Zugang zum Dealer-Portal zum Bezug von Ersatzteilen.',
+      'Die Zahlung erfolgt per automatischem SEPA-Lastschrifteinzug innerhalb von 14 Tagen, ohne Skontoabzug.'
+    ]}
+  };
+
+  function docHeadHtml() {
+    return '<div class="doc-head">' +
+      '<svg viewBox="247 498 721 182" xmlns="http://www.w3.org/2000/svg" aria-label="QWIC"><path fill="#000000" d="M 278.921874667,498.880208 C 261.526041333,498.880208 247.453125333,512.958333333 247.453125333,530.343749333 L 247.453125333,648.343749333 C 247.453125333,665.734374667 261.526041333,679.807292 278.921874667,679.807292 L 376.036458667,679.807292 L 336.708333333,640.479166667 L 294.651041333,640.479166667 C 290.296874667,640.479166667 286.781250667,636.958333333 286.781250667,632.609374667 L 286.781250667,546.078125333 C 286.781250667,541.729166667 290.296874667,538.213541333 294.651041333,538.213541333 L 396.911458667,538.213541333 C 401.260416,538.213541333 404.776041333,541.729166667 404.776041333,546.078125333 L 404.776041333,619.5 L 444.109374667,658.828125333 L 444.109374667,530.348958667 C 444.109374667,512.958333333 430.036458667,498.880208 412.645833333,498.880208 Z M 278.921874667,498.880208"/><path fill="#000000" d="M 483.838541333,680.036458666 L 679.052082666,680.036458666 C 696.447917333,680.036458666 710.520833333,665.963541333 710.520833333,648.572917333 L 710.520833333,499.114584 L 671.1875,499.114584 L 671.1875,632.843749333 C 671.1875,637.1875 667.666666666,640.708333333 663.317708,640.708333333 L 612.1875,640.708333333 L 612.1875,499.114584 L 572.859374667,499.114584 L 572.859374667,640.708333333 L 513.864584,640.708333333 L 513.864584,499.114584 L 474.526041333,499.114584 L 474.526041333,680.036458666 Z M 483.838541333,680.036458666"/><path fill="#000000" d="M 741.031250666,679.411458666 L 780.359374666,679.411458666 L 780.359374666,498.489584 L 741.031250666,498.489584 Z M 741.031250666,679.411458666"/><path fill="#000000" d="M 850.109374666,546.1875 C 850.109374666,541.843749333 853.625,538.322917333 857.973958666,538.322917333 L 968.098958666,538.322917333 L 968.098958666,498.994792 L 842.239584,498.994792 C 824.848958666,498.994792 810.776041333,513.067708 810.776041333,530.458333333 L 810.776041333,648.447917333 C 810.776041333,665.843749333 824.848958666,679.916666666 842.239584,679.916666666 L 968.098958666,679.916666666 L 968.098958666,640.583333333 L 857.973958666,640.583333333 C 853.625,640.583333333 850.109374666,637.067708 850.109374666,632.718749333 Z M 850.109374666,546.1875"/><path fill="#f47920" d="M 342.151041333,625.104166667 L 391.348958667,674.302082666 C 394.416666667,677.369792 400.473958667,679.875 404.8125,679.875 L 436.354166667,679.875 C 440.6875,679.875 441.729166667,677.369792 438.661458667,674.302082666 L 389.463541333,625.104166667 C 386.395833333,622.036458667 380.338541333,619.526041333 376.005208,619.526041333 L 344.463541333,619.526041333 C 340.125,619.526041333 339.083333333,622.036458667 342.151041333,625.104166667"/></svg>' +
+      '<div class="doc-title">Partnervereinbarung 2027</div></div>';
+  }
+
+  function footHtml(page, total) {
+    return '<div class="foot"><span>QWIC · Partnervereinbarung 2027</span><span>Seite ' + page + ' / ' + total + '</span></div>';
+  }
+
+  function renderContract() {
+    var host = $('printArea');
+    var htyp = checked('ht_xl') ? 'xl' : (checked('ht_sp') ? 'sp' : 'std');
+    var freiMode = checked('mm_frei');
+    var staffelIdx = freiMode ? -1 : parseInt(val('c_staffelSel'), 10);
+    var withLegal = checked('c_legal');
+    var totalPages = withLegal ? 3 : 2;
+
+    // ---- Total Marge
+    var totalMarge = 0;
+    if (freiMode) totalMarge += num('c_freiMarge');
+    else if (staffelIdx >= 0) totalMarge += staffeln[staffelIdx].marge;
+    if (checked('k_pos')) totalMarge += num('k_pos_p');
+    if (checked('k_vor')) totalMarge += num('k_vor_p');
+    if (checked('k_aus')) totalMarge += num('k_aus_p');
+
+
+    // ================= Seite 1 =================
+    var p1 = docHeadHtml();
+
+    p1 += '<h4 class="sec">Kundendaten</h4><div class="kd-grid">' +
+      boxHtml('Kundennummer', val('c_kdnr')) + boxHtml('Händlername', val('c_haendler')) + boxHtml('E-Mail', val('c_email')) +
+      boxHtml('Stadt', val('c_stadt')) + boxHtml('Geschäftsführer', val('c_gf')) +
+      (val('c_ziel') ? boxHtml('Jahresziel Umsatz (netto)', euro.format(num('c_ziel'))) : '<div></div>') +
+      '</div>';
+
+    var hb = HTYP_BLOCKS[htyp];
+    p1 += '<h4 class="sec">Händlerschaft: ' + hb.title + '</h4><ul>' +
+      hb.items.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
+
+    if (freiMode) {
+      p1 += '<h4 class="sec">Marge</h4>' +
+        '<div class="pct-line"><span>Vereinbarte Händlermarge auf die unverbindlichen Verkaufspreise (exkl. MwSt.), unabhängig von Umsatzstaffeln, gültig für die gesamte Vertragslaufzeit 2027.</span>' +
+        '<span class="p">' + pct.format(num('c_freiMarge')) + ' %</span></div>';
+    } else {
+      p1 += '<h4 class="sec">Margenstaffel</h4><table class="ct"><thead><tr><th style="text-align:left;">Staffel</th><th>Umsatz €</th><th>Marge %</th></tr></thead><tbody>';
+      staffeln.forEach(function (st, i) {
+        var range = st.bis !== null
+          ? new Intl.NumberFormat('de-DE').format(st.von) + ' – ' + new Intl.NumberFormat('de-DE').format(st.bis)
+          : '&gt; ' + new Intl.NumberFormat('de-DE').format(st.von);
+        p1 += '<tr' + (i === staffelIdx ? ' class="chosen"' : '') + '><td>' + st.s + (i === staffelIdx ? ' — vereinbart' : '') + '</td><td style="text-align:right;">' + range + '</td><td style="text-align:right;">' + pct.format(st.marge) + ' %</td></tr>';
+      });
+      p1 += '</tbody></table>';
+    }
+
+    var kpiLines = [];
+    if (checked('k_pos')) kpiLines.push({ t: 'Markenpräsenz: Bei der Erstbestellung müssen mindestens 4 Fahrräder inklusive POS-Material abgenommen werden.', p: num('k_pos_p') });
+    if (checked('k_vor')) kpiLines.push({ t: 'Planung: Bis zum 31.12.2026: mind. 30 % des Umsatzziels als Vorbestellung bis zum 01.09.2027.', p: num('k_vor_p') });
+    if (checked('k_aus')) kpiLines.push({ t: 'Planung: Bis zum 01.07.2027: mind. 40 % des Umsatzziels ausgeliefert.', p: num('k_aus_p') });
+    if (kpiLines.length) {
+      p1 += '<h4 class="sec">KPI</h4>';
+      kpiLines.forEach(function (l) {
+        p1 += '<div class="pct-line"><span>' + l.t + '</span><span class="p">' + (l.p > 0 ? '+ ' + pct.format(l.p) + ' %' : '') + '</span></div>';
+      });
+    }
+
+    if (checked('k_sepa')) {
+      p1 += '<h4 class="sec">Zahlungsbedingungen</h4>' +
+        '<div class="pct-line"><span>Die Zahlung erfolgt per automatischem Lastschrifteinzug innerhalb von 14 Tagen. Der Abzug wird auf den aus Marge X resultierenden Einkaufspreis gewährt.</span><span class="p">' + (num('k_sepa_p') > 0 ? '− ' + pct.format(num('k_sepa_p')) + ' %' : '') + '</span></div>';
+    }
+
+    if (freiMode || staffelIdx >= 0 || kpiLines.length || checked('k_sepa')) {
+      p1 += '<div class="total-marge"><span>Total Marge X (Marge + KPI)</span><span>' + pct.format(totalMarge) + ' %</span></div>';
+    }
+
+    p1 += footHtml(1, totalPages);
+
+    // ================= Seite 2 =================
+    var p2 = docHeadHtml();
+    var boni = [];
+    if (checked('b_brekr')) boni.push({ h: 'Brekr Bonus', t: 'Wenn im Jahr 2027 mindestens 5 Brekr Fahrräder geliefert wurden, wird ein Bonus von ' + pct.format(num('b_brekr_p')) + ' % gewährt.', p: pct.format(num('b_brekr_p')) + ' %' });
+
+    if (boni.length) {
+      p2 += '<h4 class="sec">Bonus</h4>';
+      boni.forEach(function (b) {
+        p2 += '<div class="pct-line"><span><strong>' + b.h + '</strong><br>' + b.t + '</span><span class="p">' + b.p + '</span></div>';
+      });
+      p2 += '<p class="note-sm">Der Bonus wird im 1. Quartal 2028 mittels Gutschrift ausgezahlt. Der Prozentsatz wird auf den netto fakturierten QWIC-Umsatz berechnet. Bei unzureichendem Zahlungsverhalten behält sich QWIC das Recht vor, die Auszahlung des Leistungsbonus zu verweigern.</p>';
+    }
+
+    if (checked('d_demo') || checked('d_brekr')) {
+      p2 += '<h4 class="sec">7 % Rabatt auf Demo-Modelle</h4><ul>';
+      if (checked('d_demo')) {
+        if (htyp === 'xl') p2 += '<li>7 % Rabatt auf maximal 8 verschiedene Vorführmodelle (XL-Händler).</li>';
+        else if (htyp === 'std') p2 += '<li>7 % Rabatt auf maximal 5 verschiedene Vorführmodelle (Händler).</li>';
+        else p2 += '<li>7 % Rabatt auf Vorführmodelle gemäß separater Vereinbarung.</li>';
+        p2 += '<li>Modellauswahl: Signal I Echo I Inter I Elan I Mira I Atlas I Brekr – Auswahl auf separatem Bestellformular.</li>';
+      }
+      if (checked('d_brekr')) p2 += '<li>7 % Rabatt auf maximal 2 verschiedene Brekr-Modelle.</li>';
+      p2 += '</ul>';
+    }
+
+    if (val('c_notes')) {
+      p2 += '<h4 class="sec">Notizen</h4><div class="box" style="min-height:20mm;"><div class="bv" style="font-weight:400; white-space:pre-wrap;">' + esc(val('c_notes')) + '</div></div>';
+    }
+
+    var datum = val('c_datum') ? new Date(val('c_datum') + 'T00:00:00').toLocaleDateString('de-DE') : '';
+    p2 += '<h4 class="sec">Vereinbarung</h4>' +
+      '<div class="kd-grid" style="grid-template-columns:1fr 1fr;">' + boxHtml('Datum', datum) + boxHtml('Ort', val('c_ort')) + '</div>' +
+      '<div class="sig-grid">' +
+      '<div><div style="height:16mm;"></div><div class="sig"><div class="sig-name">' + esc(val('c_signH')) + '&nbsp;</div>Vollständiger Name + Unterschrift des Händlers</div></div>' +
+      '<div><div style="height:16mm;"></div><div class="sig"><div class="sig-name">' + esc(val('c_signV')) + '&nbsp;</div>Vollständiger Name + Unterschrift des Vertriebsvertreters</div></div>' +
+      '</div>' +
+      '<p class="note-sm">Mit der Unterzeichnung dieser Vereinbarung bestätigen Sie, zeichnungsberechtigt für das genannte Unternehmen zu sein, und erklären Ihr Einverständnis mit den hierin festgelegten Bedingungen und Konditionen.</p>';
+    p2 += footHtml(2, totalPages);
+
+    // ================= Seite 3 (Rechtstext) =================
+    var p3 = '';
+    if (withLegal) {
+      p3 = docHeadHtml() + '<h4 class="sec">Partnervereinbarung QWIC DE 2027 – Vertragsbedingungen</h4><div class="legal">' +
+      '<p>Diese Partnervereinbarung ist Bestandteil des vorliegenden Vertrags. Zusätzlich gelten die Allgemeinen Geschäftsbedingungen von QWIC für diesen Vertrag und werden als integraler Bestandteil betrachtet („Allgemeine Geschäftsbedingungen der QWIC BV“). Die aktuellen Allgemeinen Geschäftsbedingungen sind im Händlerportal von QWIC veröffentlicht und können auf Anfrage vom Vertreter von QWIC bereitgestellt werden. Soweit diese Partnervereinbarung von den Allgemeinen Geschäftsbedingungen abweichen oder im Widerspruch dazu stehen, hat die Partnervereinbarung Vorrang. Mit der Unterzeichnung dieses Vertrags erklären Sie, dass Sie die Partnervereinbarung sowie die Allgemeinen Geschäftsbedingungen von QWIC zur Kenntnis genommen haben und diese akzeptieren.</p>' +
+      '<h5>1. Allgemeines</h5>' +
+      '<p>1.1 Die auf dem Deckblatt angegebenen finanziellen Vereinbarungen gelten grundsätzlich für die gesamte Vertragslaufzeit (Januar – Dezember 2027). QWIC behält sich das Recht vor, die finanziellen Vereinbarungen während der Laufzeit anzupassen, falls nach ihrem Ermessen die Umsatzziele für das laufende Jahr nicht erreicht werden.</p>' +
+      '<p>1.2 Die Händlervereinbarung gilt ausschließlich für die bei QWIC registrierte Adresse des Ladengeschäfts/Showrooms oder Abholpunkts. Falls sich die Adresse ändert oder eine neue Adresse hinzukommt, muss eine separate Händlervereinbarung abgeschlossen werden.</p>' +
+      '<p>1.3 Alle Preise sind empfohlene Verkaufspreise für Endverbraucher inkl. MwSt., sofern nicht anders angegeben.</p>' +
+      '<p>1.4 Nach Beendigung dieses Vertrags – aus welchem Grund auch immer – ist der Händler verpflichtet, jegliche Vermarktung und den Verkauf der Produkte sofort einzustellen, sofern er sich dabei als (autorisierter) Händler und/oder bevorzugter Lieferant von QWIC präsentiert oder dies suggeriert.</p>' +
+      '<h5>2. Marketing und Präsentation</h5>' +
+      '<p>2.1 Der Händler beschäftigt Mitarbeiter, die mit den neuesten Informationen über die Eigenschaften sowie den sachgerechten und verantwortungsvollen Gebrauch der QWIC-Produkte vertraut sind. Diese Mitarbeiter nehmen an den von QWIC geforderten technischen und kommerziellen Schulungen teil.</p>' +
+      '<p>2.2 Der Händler präsentiert die QWIC-Produkte ansprechend (sowohl offline als auch online). Er bewirbt die Produkte aktiv in Übereinstimmung mit dem Markenimage und hält sich dabei an die Marketingrichtlinien von QWIC.</p>' +
+      '<p>2.3 Der Händler verpflichtet sich, aktuelle Versionen von Produktdokumentationen wie Broschüren, Handbücher und verfügbares POS-Material aktiv an Besucher, Kunden und online weiterzugeben.</p>' +
+      '<p>2.4 Der Händler nutzt alle von QWIC über das Händlerportal bereitgestellten Produktbilder – sowohl für das Geschäft als auch für die eigene Website und externe (digitale) Plattformen.</p>' +
+      '<h5>3. Sortiment, Preise und Zahlung</h5>' +
+      '<p>3.1 Die in diesem Vertrag angegebenen Margen werden auf Basis der unverbindlichen Verkaufspreise für Endverbraucher exkl. MwSt. berechnet.</p>' +
+      '<p>3.2 QWIC ist nicht verpflichtet, dem Händler das gesamte Produktsortiment zum (Wieder-)Verkauf anzubieten.</p>' +
+      '<p>3.3 QWIC behält sich das Recht vor, Produkte, Komponenten, Materialien oder Rohstoffe, die in den QWIC-Produkten verwendet werden, jederzeit zu ändern oder anzupassen. In einem solchen Fall ist QWIC nicht verpflichtet, Schadensersatz zu leisten oder bereits gelieferte Produkte zurückzunehmen.</p>' +
+      '<p>3.4 Obwohl QWIC empfiehlt, die unverbindlichen Verkaufspreise einzuhalten, ist es dem Händler freigestellt, eigene Preise und Rabatte festzulegen. Es ist jedoch nicht gestattet, Preise und Rabatte (offline und/oder online) in einer Weise zu präsentieren, die dem Markenimage und der A-Marken-Positionierung von QWIC-Produkten schadet.</p>' +
+      '<p>3.5 QWIC gewährt eine Zahlungsfrist von 14 Tagen ab Rechnungsdatum, sofern nicht ausdrücklich schriftlich anders vereinbart.</p>' +
+      '<h5>4. Stornierung, Ablehnung und Verschiebung von Bestellungen</h5>' +
+      '<p>4.1 Bestellungen für E-Bikes und E-Bikes mit Akku können innerhalb von zwei Werktagen nach Bestelldatum kostenlos storniert werden, sofern die Bestellung noch nicht versandt wurde.</p>' +
+      '<p>4.2 Der Händler ist verpflichtet, die bestellten QWIC-Produkte zum vereinbarten Zeitpunkt anzunehmen. Falls der Händler die Annahme verweigert oder notwendige Informationen für die Lieferung nicht bereitstellt, werden die QWIC-Produkte auf Risiko und Kosten des Händlers eingelagert. Neben dem Kaufpreis trägt der Händler in diesem Fall die Lagerkosten. Entstehende Transport- und Lagerkosten werden direkt von QWIC an den Händler weiterberechnet.</p>' +
+      '<p>4.3 Falls die Annahme der Lieferung an der Tür verweigert wird, wird die Bestellung auf den nächsten verfügbaren Liefertermin erneut zugestellt – die Kosten trägt der Händler.</p>' +
+      '<p>4.4 Die Rückgabe von Produkten ist nur in Ausnahmefällen möglich (vollständig nach Ermessen von QWIC) und erfolgt maximal zu 90 % des Einkaufspreises.</p>' +
+      '<p>4.5 Bestellungen können einmalig kostenlos auf einen späteren Liefertermin verschoben werden, sofern die Bestellung noch nicht versandt wurde und die spätere Lieferung innerhalb der aktuellen Vertragslaufzeit erfolgt.</p>' +
+      '<p>4.6 Nachträgliche Änderungen, mehrfache Verschiebungen oder Stornierungen von Bestellungen sind ohne vorherige schriftliche Genehmigung von QWIC nicht möglich. Falls eine Bestellung in ein neues Vertragsjahr verschoben oder storniert wird, kann QWIC Stornierungskosten von bis zu 10 % des ursprünglichen Bestellwerts erheben.</p>' +
+      '<h5>5. Bonusregelung</h5>' +
+      '<p>5.1 Bei wiederholt schlechtem Zahlungsverhalten behält sich QWIC das Recht vor, keine oder eine reduzierte Bonuszahlung auszuzahlen.</p>' +
+      '<p>5.2 Falls eine Forderung zur Inkassobearbeitung übergeben wurde, erlischt der Anspruch auf eine Bonuszahlung sofort.</p>' +
+      '<p>5.3 Der Händler erklärt sich mit einer direkten Anbindung und Einsicht in sein Kassensystem einverstanden. Dies ermöglicht QWIC Einblick in die Verkaufszahlen der eigenen Produkte und dient der Förderung des Absatzes sowohl für den Händler als auch für QWIC.</p>' +
+      '</div>' + footHtml(3, totalPages);
+    }
+
+    host.innerHTML = '<div class="sheet">' + p1 + '</div><div class="sheet">' + p2 + '</div>' + (p3 ? '<div class="sheet">' + p3 + '</div>' : '');
+    fitPreview();
+  }
+
+  $('pdfBtn').addEventListener('click', function () {
+    renderContract();
+    window.print();
+  });
+
+  // ---------- Init ----------
+  var today = new Date();
+  $('c_datum').value = today.toISOString().slice(0, 10);
+  renderSelect();
+  calc();
+  renderContract();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js'); });
+}
+</script>
+</body>
+</html>
