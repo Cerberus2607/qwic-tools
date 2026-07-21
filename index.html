@@ -215,6 +215,11 @@
 
   .contract-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
 
+  .wb-wrap { max-width: 880px; margin: 0 auto; }
+  .wb-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .wb-toolbar select { width: auto; min-width: 130px; }
+  .wb-page { width: 100%; display: block; margin-bottom: 14px; border-radius: 6px; background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.3); }
+
   footer { text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 2px; padding: 20px; text-transform: uppercase; }
 
   /* ---------- Druck: nur Vertrag ---------- */
@@ -222,10 +227,12 @@
     @page { size: A4; margin: 0; }
     #printArea { zoom: 1 !important; }
     body { background: #fff; }
-    header, footer, .no-print, #previewTitle { display: none !important; }
+    header, footer, .no-print, #previewTitle, #sepaPreviewTitle { display: none !important; }
     .tab-page { display: none !important; }
-    #tab-contract { display: block !important; }
-    #tab-calc { display: none !important; }
+    body:not([data-print="sepa"]) #tab-contract { display: block !important; }
+    body[data-print="sepa"] #tab-sepa { display: block !important; }
+    #tab-calc, #tab-workbook { display: none !important; }
+    #sepaPrintArea { zoom: 1 !important; margin: 0; }
     main { max-width: none; padding: 0; }
     #printArea { margin: 0; }
     .sheet { width: 210mm; min-height: 296mm; margin: 0; padding: 14mm 15mm; border-radius: 0; box-shadow: none; page-break-after: always; }
@@ -242,7 +249,9 @@
   <div class="subtitle">Händler-Tools</div>
   <nav class="tabs no-print">
     <button id="tabBtnContract" class="active">Vertragserstellung 2027</button>
+    <button id="tabBtnSepa">SEPA-Mandat</button>
     <button id="tabBtnCalc">Kalkulationstool</button>
+    <button id="tabBtnWorkbook">Dealer Workbook</button>
   </nav>
 </header>
 
@@ -342,6 +351,73 @@
       <div class="col-title" id="previewTitle" style="font-size:13px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin:0 0 12px 4px;">Vertragsvorschau</div>
       <div id="printArea"></div>
     </div>
+  </div>
+</section>
+
+<!-- ============================================================ SEPA-MANDAT (Tab 2) -->
+<section id="tab-sepa" class="tab-page">
+  <div class="grid">
+
+    <div class="card no-print">
+      <h2>Zahlungsempfänger</h2>
+      <div class="row2">
+        <div><label>Name</label><input type="text" id="s_name" value="QWIC B.V."></div>
+        <div><label>Gläubiger-ID</label><input type="text" id="s_glid" value="NL46ZZZ719338910000"></div>
+      </div>
+      <div class="row2">
+        <div><label>Adresse</label><input type="text" id="s_adr" value="Disketteweg 53"></div>
+        <div><label>PLZ</label><input type="text" id="s_plz" value="1031 NW"></div>
+      </div>
+      <div class="row2">
+        <div><label>Firmensitz</label><input type="text" id="s_ort" value="Amsterdam"></div>
+        <div><label>Land</label><input type="text" id="s_land" value="Niederlande"></div>
+      </div>
+      <label>Mandatsreferenz (Kundennummer)</label>
+      <input type="text" id="s_mref" placeholder="z. B. K07406">
+
+      <h3>Maximalbetrag pro Lastschrift</h3>
+      <div class="checkline"><input type="radio" name="smax" id="s_maxU" checked><div class="cl-body">Unbegrenzt</div></div>
+      <div class="checkline"><input type="radio" name="smax" id="s_maxB"><div class="cl-body">Begrenzt auf Betrag (€)</div><div class="pct" style="width:110px;"><input type="number" id="s_betrag" min="0" step="500" placeholder="€"></div></div>
+    </div>
+
+    <div class="card no-print">
+      <h2>Angaben zum Händler</h2>
+      <div class="row2">
+        <div><label>Name des Kontoinhabers</label><input type="text" id="s_hname"></div>
+        <div><label>IBAN</label><input type="text" id="s_iban" placeholder="DE.."></div>
+      </div>
+      <div class="row2">
+        <div><label>BIC</label><input type="text" id="s_bic"></div>
+        <div><label>Adresse</label><input type="text" id="s_hadr"></div>
+      </div>
+      <div class="row2">
+        <div><label>PLZ</label><input type="text" id="s_hplz"></div>
+        <div><label>Firmensitz</label><input type="text" id="s_hort"></div>
+      </div>
+      <label>Land</label>
+      <input type="text" id="s_hland" value="Deutschland">
+
+      <h3>Unterzeichnung</h3>
+      <div class="row2">
+        <div><label>Unterzeichnet in (Ort)</label><input type="text" id="s_sort"></div>
+        <div><label>Datum</label><input type="date" id="s_datum"></div>
+      </div>
+      <label>Name des Unterzeichners</label>
+      <input type="text" id="s_sname">
+      <label>Unterschrift (zeichnen)</label>
+      <div class="sigpad-wrap"><canvas id="sigS" class="sigpad"></canvas><button type="button" class="ghost sig-clear" id="sigSClear">Löschen</button></div>
+
+      <div class="contract-actions">
+        <button class="btn" id="sepaPdfBtn">PDF erstellen</button>
+        <span class="hint" style="margin:0;">Öffnet den Druckdialog → „Als PDF sichern“.</span>
+      </div>
+    </div>
+
+    <div class="full">
+      <div class="col-title" id="sepaPreviewTitle">Mandats-Vorschau</div>
+      <div id="sepaPrintArea"></div>
+    </div>
+
   </div>
 </section>
 
@@ -466,6 +542,18 @@
   </div>
 </section>
 
+<!-- ============================================================ WORKBOOK (Tab 3) -->
+<section id="tab-workbook" class="tab-page">
+  <div class="wb-wrap">
+    <div class="wb-toolbar">
+      <span class="col-title" style="margin:0;">QWIC Dealer Workbook 2026 · 36 Seiten</span>
+      <select id="wbJump" title="Zu Seite springen"></select>
+    </div>
+    <div id="wbPages"></div>
+    <p class="hint">Zum Zoomen Pinch-Geste (iPad) bzw. Browser-Zoom nutzen. Seiten laden beim Scrollen automatisch nach.</p>
+  </div>
+</section>
+
 </main>
 
 <footer>QWIC Händler-Kalkulation · HEK = (UVP ÷ 1,19) × (1 − Marge)</footer>
@@ -529,15 +617,51 @@
   applyTheme(load(THEME_KEY) || 'dark');
 
   // ================= Tabs =================
+  var WB_PAGES = 36;
+  var wbBuilt = false;
+  function initWorkbook() {
+    if (wbBuilt) return;
+    wbBuilt = true;
+    var host = $('wbPages'), jump = $('wbJump');
+    for (var i = 1; i <= WB_PAGES; i++) {
+      var nn = (i < 10 ? '0' : '') + i;
+      var img = document.createElement('img');
+      img.className = 'wb-page';
+      img.loading = 'lazy';
+      img.id = 'wbp' + i;
+      img.src = 'workbook/page-' + nn + '.jpg';
+      img.alt = 'Workbook Seite ' + i;
+      host.appendChild(img);
+      var o = document.createElement('option');
+      o.value = String(i); o.textContent = 'Seite ' + i;
+      jump.appendChild(o);
+    }
+    jump.addEventListener('change', function () {
+      var el = $('wbp' + this.value);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+  var sepaPadDone = false;
   function showTab(which) {
     $('tab-contract').classList.toggle('visible', which === 'contract');
+    $('tab-sepa').classList.toggle('visible', which === 'sepa');
     $('tab-calc').classList.toggle('visible', which === 'calc');
+    $('tab-workbook').classList.toggle('visible', which === 'workbook');
     $('tabBtnContract').classList.toggle('active', which === 'contract');
+    $('tabBtnSepa').classList.toggle('active', which === 'sepa');
     $('tabBtnCalc').classList.toggle('active', which === 'calc');
+    $('tabBtnWorkbook').classList.toggle('active', which === 'workbook');
     if (which === 'contract') { renderContract(); }
+    if (which === 'workbook') { initWorkbook(); }
+    if (which === 'sepa') {
+      if (!sepaPadDone) { sepaPadDone = true; makeSigPad('sigS', 'sigSClear', 'S'); }
+      renderSepa();
+    }
   }
   $('tabBtnContract').addEventListener('click', function () { showTab('contract'); });
+  $('tabBtnSepa').addEventListener('click', function () { showTab('sepa'); });
   $('tabBtnCalc').addEventListener('click', function () { showTab('calc'); });
+  $('tabBtnWorkbook').addEventListener('click', function () { showTab('workbook'); });
 
   // ================= Kalkulation =================
   function renderSelect() {
@@ -825,11 +949,11 @@
     function up() {
       if (!drawing) return;
       drawing = false;
-      if (hasInk) { sigData[key] = cv.toDataURL('image/png'); renderContract(); }
+      if (hasInk) { sigData[key] = cv.toDataURL('image/png'); (key === 'S' ? renderSepa : renderContract)(); }
     }
     cv.addEventListener('pointerup', up);
     cv.addEventListener('pointercancel', up);
-    $(clearId).addEventListener('click', function () { setup(); sigData[key] = null; renderContract(); });
+    $(clearId).addEventListener('click', function () { setup(); sigData[key] = null; (key === 'S' ? renderSepa : renderContract)(); });
     setup();
   }
 
@@ -870,10 +994,10 @@
     ]}
   };
 
-  function docHeadHtml() {
+  function docHeadHtml(title) {
     return '<div class="doc-head">' +
       '<svg viewBox="247 498 721 182" xmlns="http://www.w3.org/2000/svg" aria-label="QWIC"><path fill="#000000" d="M 278.921874667,498.880208 C 261.526041333,498.880208 247.453125333,512.958333333 247.453125333,530.343749333 L 247.453125333,648.343749333 C 247.453125333,665.734374667 261.526041333,679.807292 278.921874667,679.807292 L 376.036458667,679.807292 L 336.708333333,640.479166667 L 294.651041333,640.479166667 C 290.296874667,640.479166667 286.781250667,636.958333333 286.781250667,632.609374667 L 286.781250667,546.078125333 C 286.781250667,541.729166667 290.296874667,538.213541333 294.651041333,538.213541333 L 396.911458667,538.213541333 C 401.260416,538.213541333 404.776041333,541.729166667 404.776041333,546.078125333 L 404.776041333,619.5 L 444.109374667,658.828125333 L 444.109374667,530.348958667 C 444.109374667,512.958333333 430.036458667,498.880208 412.645833333,498.880208 Z M 278.921874667,498.880208"/><path fill="#000000" d="M 483.838541333,680.036458666 L 679.052082666,680.036458666 C 696.447917333,680.036458666 710.520833333,665.963541333 710.520833333,648.572917333 L 710.520833333,499.114584 L 671.1875,499.114584 L 671.1875,632.843749333 C 671.1875,637.1875 667.666666666,640.708333333 663.317708,640.708333333 L 612.1875,640.708333333 L 612.1875,499.114584 L 572.859374667,499.114584 L 572.859374667,640.708333333 L 513.864584,640.708333333 L 513.864584,499.114584 L 474.526041333,499.114584 L 474.526041333,680.036458666 Z M 483.838541333,680.036458666"/><path fill="#000000" d="M 741.031250666,679.411458666 L 780.359374666,679.411458666 L 780.359374666,498.489584 L 741.031250666,498.489584 Z M 741.031250666,679.411458666"/><path fill="#000000" d="M 850.109374666,546.1875 C 850.109374666,541.843749333 853.625,538.322917333 857.973958666,538.322917333 L 968.098958666,538.322917333 L 968.098958666,498.994792 L 842.239584,498.994792 C 824.848958666,498.994792 810.776041333,513.067708 810.776041333,530.458333333 L 810.776041333,648.447917333 C 810.776041333,665.843749333 824.848958666,679.916666666 842.239584,679.916666666 L 968.098958666,679.916666666 L 968.098958666,640.583333333 L 857.973958666,640.583333333 C 853.625,640.583333333 850.109374666,637.067708 850.109374666,632.718749333 Z M 850.109374666,546.1875"/><path fill="#f47920" d="M 342.151041333,625.104166667 L 391.348958667,674.302082666 C 394.416666667,677.369792 400.473958667,679.875 404.8125,679.875 L 436.354166667,679.875 C 440.6875,679.875 441.729166667,677.369792 438.661458667,674.302082666 L 389.463541333,625.104166667 C 386.395833333,622.036458667 380.338541333,619.526041333 376.005208,619.526041333 L 344.463541333,619.526041333 C 340.125,619.526041333 339.083333333,622.036458667 342.151041333,625.104166667"/></svg>' +
-      '<div class="doc-title">Partnervereinbarung 2027</div></div>';
+      '<div class="doc-title">' + (title || 'Partnervereinbarung 2027') + '</div></div>';
   }
 
   function footHtml(page, total) {
@@ -1025,7 +1149,70 @@
     fitPreview();
   }
 
+  // ================= SEPA-Mandat =================
+  function renderSepa() {
+    var host = $('sepaPrintArea');
+    if (!host) return;
+    var maxTxt = $('s_maxU').checked
+      ? 'Unbegrenzt'
+      : ('Begrenzt auf ' + (val('s_betrag') ? euro.format(num('s_betrag')) : '________ €') + ' pro Lastschrift');
+    var datum = val('s_datum') ? new Date(val('s_datum') + 'T00:00:00').toLocaleDateString('de-DE') : '';
+    var sig = sigData.S ? '<img src="' + sigData.S + '" alt="" style="height:16mm; max-width:100%; display:block;">' : '<div style="height:16mm;"></div>';
+
+    var p = docHeadHtml('SEPA-Firmenlastschrift');
+    p += '<p style="font-size:9pt; color:#555; margin:-4mm 0 4mm;">Fortlaufende Einzugsermächtigung für Firmenkunden (SEPA-Firmenlastschrift)</p>';
+
+    p += '<h4 class="sec">Zahlungsempfänger</h4><div class="kd-grid" style="grid-template-columns:1fr 1fr;">' +
+      boxHtml('Name', val('s_name')) + boxHtml('Gläubiger-ID', val('s_glid')) +
+      boxHtml('Adresse', val('s_adr')) + boxHtml('PLZ', val('s_plz')) +
+      boxHtml('Firmensitz', val('s_ort')) + boxHtml('Land', val('s_land')) +
+      '</div><div style="margin-top:4mm;">' + boxHtml('Mandatsreferenz (Kundennummer)', val('s_mref')) + '</div>';
+
+    p += '<h4 class="sec">Angaben zum Händler</h4><div class="kd-grid" style="grid-template-columns:1fr 1fr;">' +
+      boxHtml('Name des Kontoinhabers', val('s_hname')) + boxHtml('IBAN', val('s_iban')) +
+      boxHtml('BIC', val('s_bic')) + boxHtml('Adresse', val('s_hadr')) +
+      boxHtml('PLZ', val('s_hplz')) + boxHtml('Firmensitz', val('s_hort')) +
+      '</div><div style="margin-top:4mm;">' + boxHtml('Land', val('s_hland')) + '</div>';
+
+    p += '<div class="pct-line" style="margin-top:4mm;"><span><strong>Maximalbetrag pro Lastschrift</strong></span><span class="p">' + maxTxt + '</span></div>' +
+      '<p class="note-sm">Falls der von Ihnen festgelegte Einzugsbetrag nicht ausreicht, um offene Rechnungen zu begleichen, kann dies zu einer Reduzierung Ihres Kreditlimits führen. Bitte sorgen Sie daher für ausreichenden Spielraum innerhalb Ihrer Einzugsermächtigung.</p>';
+
+    p += '<h4 class="sec">Ermächtigung</h4>' +
+      '<p style="font-size:9pt;">Ich ermächtige/Wir ermächtigen Sie, Zahlungen von meinem/unserem Konto mittels Lastschrift einzuziehen. Zugleich weise ich meinen/weisen wir unseren unten genannten Zahlungsdienstleister (Kreditinstitut) an, die von Ihnen auf mein/unser Konto gezogenen Lastschriften einzulösen.</p>' +
+      '<p style="font-size:9pt; margin-top:2mm;"><strong>Hinweis:</strong> Dieses Lastschriftmandat dient nur dem Einzug von Lastschriften, die auf Konten von Unternehmen gezogen sind. Ich bin/Wir sind nicht berechtigt, nach der erfolgten Einlösung eine Erstattung des belasteten Betrages zu verlangen. Ich bin/Wir sind berechtigt, meinen/unseren Zahlungsdienstleister (Kreditinstitut) bis zum Fälligkeitstag anzuweisen, Lastschriften nicht einzulösen.</p>' +
+      '<p style="font-size:9pt; margin-top:2mm;"><strong>WICHTIG:</strong> Eine Abbuchung von Ihrem Konto kann nur erfolgen, wenn Sie auch Ihrer Bank hierfür die Erlaubnis erteilen. Sie müssen diese Lastschriftvollmacht auch selbst bei Ihrer Bank registrieren. Weitere Informationen finden Sie auf der Website Ihrer Bank.</p>';
+
+    p += '<h4 class="sec">Unterzeichnung</h4>' +
+      '<div class="kd-grid" style="grid-template-columns:1fr 1fr;">' +
+      boxHtml('Unterzeichnet in', val('s_sort')) + boxHtml('Datum', datum) +
+      '</div>' +
+      '<div class="sig-grid">' +
+      '<div><div style="height:16mm;"></div><div class="sig"><div class="sig-name">' + esc(val('s_sname')) + '&nbsp;</div>Name des Unterzeichners</div></div>' +
+      '<div>' + sig + '<div class="sig"><div class="sig-name">&nbsp;</div>Unterschrift</div></div>' +
+      '</div>';
+
+    p += '<div class="foot"><span>QWIC · SEPA-Firmenlastschrift</span><span>Seite 1 / 1</span></div>';
+    host.innerHTML = '<div class="sheet">' + p + '</div>';
+
+    var cw = host.parentElement.clientWidth;
+    host.style.zoom = Math.min(1, cw / 800);
+  }
+
+  ['s_name','s_glid','s_adr','s_plz','s_ort','s_land','s_mref','s_betrag','s_hname','s_iban','s_bic','s_hadr','s_hplz','s_hort','s_hland','s_sort','s_datum','s_sname'].forEach(function (id) {
+    var el = $(id);
+    if (el) { el.addEventListener('input', renderSepa); el.addEventListener('change', renderSepa); }
+  });
+  $('s_maxU').addEventListener('change', renderSepa);
+  $('s_maxB').addEventListener('change', renderSepa);
+
+  $('sepaPdfBtn').addEventListener('click', function () {
+    document.body.setAttribute('data-print', 'sepa');
+    renderSepa();
+    window.print();
+  });
+
   $('pdfBtn').addEventListener('click', function () {
+    document.body.removeAttribute('data-print');
     renderContract();
     window.print();
   });
@@ -1036,6 +1223,8 @@
   // ---------- Init ----------
   var today = new Date();
   $('c_datum').value = today.toISOString().slice(0, 10);
+  $('s_datum').value = today.toISOString().slice(0, 10);
+  renderSepa();
   renderSelect();
   calc();
   renderContract();
