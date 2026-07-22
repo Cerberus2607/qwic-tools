@@ -272,9 +272,12 @@
     @page { size: A4; margin: 0; }
     #printArea { zoom: 1 !important; }
     body { background: #fff; }
-    header, footer, .no-print, #previewTitle, #sepaPreviewTitle { display: none !important; }
+    header, footer, .no-print, #previewTitle, #sepaPreviewTitle, #brekrPreviewTitle { display: none !important; }
     .tab-page { display: none !important; }
-    body:not([data-print="sepa"]):not([data-print="legal"]) #tab-contract { display: block !important; }
+    body:not([data-print="sepa"]):not([data-print="legal"]):not([data-print="brekr"]) #tab-contract { display: block !important; }
+    body[data-print="brekr"] #tab-brekr { display: block !important; }
+    body[data-print="brekr"] #tab-contract, body[data-print="brekr"] #tab-sepa { display: none !important; }
+    #brekrPrintArea { zoom: 1 !important; margin: 0; }
     body[data-print="sepa"] #tab-sepa { display: block !important; }
     body[data-print="legal"] #tab-contract, body[data-print="legal"] #tab-sepa { display: none !important; }
     body[data-print="legal"] #legalPrintArea { display: block !important; }
@@ -297,6 +300,7 @@
   <nav class="tabs no-print">
     <button id="tabBtnContract" class="active">Vertragserstellung</button>
     <button id="tabBtnSepa">SEPA-Mandat</button>
+    <button id="tabBtnBrekr">Brekr Vertrag</button>
     <button id="tabBtnCalc">Kalkulationstool</button>
     <button id="tabBtnWorkbook">Dealer Workbook</button>
   </nav>
@@ -470,6 +474,99 @@
     <div class="full">
       <div class="col-title" id="sepaPreviewTitle">Mandats-Vorschau</div>
       <div id="sepaPrintArea"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================ BREKR (Tab 3) -->
+<section id="tab-brekr" class="tab-page">
+  <div class="grid">
+
+    <div class="card no-print">
+      <h2>Brekr · Kundendaten</h2>
+      <label for="bk_dealerSearch">Händler suchen (Name oder Kundennummer tippen)</label>
+      <div class="dd-wrap">
+        <input type="text" id="bk_dealerSearch" placeholder="z. B. Zweirad…" autocomplete="off">
+        <div class="dd-list" id="brekrResults"></div>
+      </div>
+      <div class="row2">
+        <div><label>Vertragsjahr</label><input type="number" id="bk_jahr" min="2026" max="2040" step="1" value="2027"></div>
+        <div><label>Firmenname</label><input type="text" id="bk_firma"></div>
+      </div>
+      <div class="row2">
+        <div><label>USt-IdNr.</label><input type="text" id="bk_ust"></div>
+        <div><label>Handelsreg.-Nr.</label><input type="text" id="bk_hreg"></div>
+      </div>
+      <div class="row2">
+        <div><label>Adresse</label><input type="text" id="bk_adr"></div>
+        <div><label>Ort (mit PLZ)</label><input type="text" id="bk_ort"></div>
+      </div>
+      <div class="row2">
+        <div><label>Land</label><input type="text" id="bk_land" value="Deutschland"></div>
+        <div><label>Ansprechpartner</label><input type="text" id="bk_ansprech"></div>
+      </div>
+      <div class="row2">
+        <div><label>E-Mail</label><input type="email" id="bk_mail"></div>
+        <div><label>Rechnungs-E-Mail</label><input type="email" id="bk_rmail"></div>
+      </div>
+      <div class="checkline" style="margin-top:10px;"><input type="checkbox" id="bk_lief" checked><div class="cl-body">Rechnungsadresse entspricht der Lieferadresse</div></div>
+
+      <h3>Leistungsbonus</h3>
+      <div class="checkline"><input type="checkbox" id="bk_b30" checked><div class="cl-body" id="lbl_bk30">&gt; 30.000 € Umsatz in 2027 — auf BREKR-Nettoumsatz</div><div class="pct"><input type="number" id="bk_b30p" value="2" step="0.5" min="0"></div></div>
+      <div class="checkline"><input type="checkbox" id="bk_b60" checked><div class="cl-body" id="lbl_bk60">&gt; 60.000 € Umsatz in 2027 — auf BREKR-Nettoumsatz</div><div class="pct"><input type="number" id="bk_b60p" value="3" step="0.5" min="0"></div></div>
+      <div class="checkline"><input type="checkbox" id="bk_bqwic" checked><div class="cl-body" id="lbl_bkqwic">Abnahme von 5 BREKR-Modellen in 2027 — auf QWIC-Nettoumsatz (nur für QWIC-Händler)</div><div class="pct"><input type="number" id="bk_bqwicp" value="1" step="0.5" min="0"></div></div>
+
+      <h3>Weitere Konditionen</h3>
+      <div class="checkline"><input type="checkbox" id="bk_demo" checked><div class="cl-body">Vorführmodelle: 7 % Rabatt auf 2× BREKR-Modelle</div></div>
+      <div class="checkline"><input type="checkbox" id="bk_sepa" checked><div class="cl-body">Lastschrift: Rabatt bei Zahlung innerhalb von 14 Tagen per SEPA-Lastschrift</div><div class="pct"><input type="number" id="bk_sepap" value="1" step="0.5" min="0"></div></div>
+
+      <label>Bemerkungen (optional)</label>
+      <textarea id="bk_notes" placeholder="Erscheint nur im PDF, wenn ausgefüllt"></textarea>
+
+      <div class="checkline" style="margin-top:10px;"><input type="checkbox" id="bk_legal" checked><div class="cl-body">Händlerkonditionen (Rechtstext) anhängen</div></div>
+      <div class="checkline"><input type="checkbox" id="bk_versand" checked><div class="cl-body">Anlage Versandkosten anhängen</div></div>
+    </div>
+
+    <div class="card no-print">
+      <h2>Brekr · Preisliste &amp; Bestellung</h2>
+      <div style="overflow-x:auto;">
+        <table id="brekrTable">
+          <thead><tr><th>Modell</th><th>UVP inkl. MwSt.</th><th>Rabatt %</th><th>Händlerpreis netto</th><th>Anzahl</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Händlerpreis = UVP ÷ 1,19 × (1 − Rabatt). UVP, Rabatt und Anzahl editierbar; Positionen mit Anzahl &gt; 0 erscheinen als Bestellung im PDF.</p>
+
+      <h3>Unterzeichnung</h3>
+      <div class="row2">
+        <div><label>Datum</label><input type="date" id="bk_datum"></div>
+        <div><label>Ort</label><input type="text" id="bk_sort"></div>
+      </div>
+      <div class="row2">
+        <div><label>Name Händler</label><input type="text" id="bk_signH"></div>
+        <div><label>Name Vertriebsmitarbeiter</label><input type="text" id="bk_signV"></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Unterschrift Händler (zeichnen)</label>
+          <div class="sigpad-wrap"><canvas id="sigBH" class="sigpad"></canvas><button type="button" class="ghost sig-clear" id="sigBHClear">Löschen</button></div>
+        </div>
+        <div>
+          <label>Unterschrift Vertriebsmitarbeiter (zeichnen)</label>
+          <div class="sigpad-wrap"><canvas id="sigBV" class="sigpad"></canvas><button type="button" class="ghost sig-clear" id="sigBVClear">Löschen</button></div>
+        </div>
+      </div>
+
+      <div class="contract-actions">
+        <button class="btn" id="brekrPdfBtn">PDF erstellen</button>
+        <span class="hint" style="margin:0;">Öffnet den Druckdialog → „Als PDF sichern“. Nicht angehakte Optionen erscheinen nicht im PDF.</span>
+      </div>
+    </div>
+
+    <div class="full">
+      <div class="col-title" id="brekrPreviewTitle">Brekr-Vertragsvorschau</div>
+      <div id="brekrPrintArea"></div>
     </div>
 
   </div>
@@ -762,13 +859,16 @@
     });
   }
   var sepaPadDone = false;
+  var brekrPadDone = false;
   function showTab(which) {
     $('tab-contract').classList.toggle('visible', which === 'contract');
     $('tab-sepa').classList.toggle('visible', which === 'sepa');
+    $('tab-brekr').classList.toggle('visible', which === 'brekr');
     $('tab-calc').classList.toggle('visible', which === 'calc');
     $('tab-workbook').classList.toggle('visible', which === 'workbook');
     $('tabBtnContract').classList.toggle('active', which === 'contract');
     $('tabBtnSepa').classList.toggle('active', which === 'sepa');
+    $('tabBtnBrekr').classList.toggle('active', which === 'brekr');
     $('tabBtnCalc').classList.toggle('active', which === 'calc');
     $('tabBtnWorkbook').classList.toggle('active', which === 'workbook');
     if (which === 'contract') { renderContract(); }
@@ -777,9 +877,14 @@
       if (!sepaPadDone) { sepaPadDone = true; makeSigPad('sigS', 'sigSClear', 'S'); }
       renderSepa();
     }
+    if (which === 'brekr') {
+      if (!brekrPadDone) { brekrPadDone = true; makeSigPad('sigBH', 'sigBHClear', 'BH'); makeSigPad('sigBV', 'sigBVClear', 'BV'); }
+      renderBrekr();
+    }
   }
   $('tabBtnContract').addEventListener('click', function () { showTab('contract'); });
   $('tabBtnSepa').addEventListener('click', function () { showTab('sepa'); });
+  $('tabBtnBrekr').addEventListener('click', function () { showTab('brekr'); });
   $('tabBtnCalc').addEventListener('click', function () { showTab('calc'); });
   $('tabBtnWorkbook').addEventListener('click', function () { showTab('workbook'); });
 
@@ -1037,7 +1142,12 @@
   window.addEventListener('resize', fitPreview);
 
   // ---------- Unterschriften ----------
-  var sigData = { H: null, V: null };
+  var sigData = { H: null, V: null, S: null, BH: null, BV: null };
+  function sigRender(key) {
+    if (key === 'S') renderSepa();
+    else if (key === 'BH' || key === 'BV') renderBrekr();
+    else renderContract();
+  }
   function makeSigPad(canvasId, clearId, key) {
     var cv = $(canvasId);
     if (!cv) return;
@@ -1069,11 +1179,11 @@
     function up() {
       if (!drawing) return;
       drawing = false;
-      if (hasInk) { sigData[key] = cv.toDataURL('image/png'); (key === 'S' ? renderSepa : renderContract)(); }
+      if (hasInk) { sigData[key] = cv.toDataURL('image/png'); sigRender(key); }
     }
     cv.addEventListener('pointerup', up);
     cv.addEventListener('pointercancel', up);
-    $(clearId).addEventListener('click', function () { setup(); sigData[key] = null; (key === 'S' ? renderSepa : renderContract)(); });
+    $(clearId).addEventListener('click', function () { setup(); sigData[key] = null; sigRender(key); });
     setup();
   }
 
@@ -1428,6 +1538,263 @@
     window.print();
   });
 
+  // ================= BREKR Vertrag =================
+  var BREKR_LOGO = 'data:image/jpeg;base64,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';
+  var BREKR_MODELLE = [
+    { g: 'BREKR L250', n: 'L250 short tail · 480-Wh-Akku', uvp: 3395, rab: 30, qty: 0 },
+    { g: 'BREKR L250', n: 'L250 short tail · 720-Wh-Akku', uvp: 3595, rab: 30, qty: 0 },
+    { g: 'BREKR L250', n: 'L250 longtail · 480-Wh-Akku', uvp: 3495, rab: 30, qty: 0 },
+    { g: 'BREKR L250', n: 'L250 longtail · 720-Wh-Akku', uvp: 3695, rab: 30, qty: 0 },
+    { g: 'BREKR L250', n: 'Mitfahrer-Kit (Sitze, Sicherheitsbügel, Schutzelemente, Fußstützen)', uvp: 499, rab: 30, qty: 0 },
+    { g: 'BREKR F250', n: 'F250 · 540-Wh-Akku', uvp: 2395, rab: 30, qty: 0 },
+    { g: 'BREKR F250', n: 'F250 mit Federung · 540-Wh-Akku', uvp: 2595, rab: 30, qty: 0 },
+    { g: 'BREKR F250', n: 'F250 · 720-Wh-Akku', uvp: 2595, rab: 30, qty: 0 },
+    { g: 'BREKR F250', n: 'F250 mit Federung · 720-Wh-Akku', uvp: 2795, rab: 30, qty: 0 },
+    { g: 'BREKR B4000', n: 'B4000', uvp: 3995, rab: 20, qty: 0 }
+  ];
+  function brekrHek(m) { return Math.round((m.uvp / 1.19) * (1 - m.rab / 100) * 100) / 100; }
+  function bkYear() { var j = Math.round(num('bk_jahr')); return (j >= 2026 && j <= 2040) ? j : 2027; }
+
+  function renderBrekrTable() {
+    var tb = $('brekrTable').querySelector('tbody');
+    tb.innerHTML = '';
+    var lastG = '';
+    BREKR_MODELLE.forEach(function (m) {
+      var tr = document.createElement('tr');
+      var tdN = document.createElement('td');
+      tdN.textContent = (m.g !== lastG ? m.g + ' — ' : '') + m.n;
+      lastG = m.g;
+      function numInput(valv, step, width, onCh) {
+        var i = document.createElement('input');
+        i.type = 'number'; i.min = '0'; i.step = step; i.value = valv;
+        i.style.cssText = 'width:' + width + 'px; text-align:right; padding:5px 6px; font-size:13px;';
+        i.addEventListener('change', onCh); i.addEventListener('input', onCh);
+        return i;
+      }
+      var tdU = document.createElement('td');
+      tdU.appendChild(numInput(m.uvp, '1', 90, function () { m.uvp = parseFloat(this.value) || 0; refreshBrekr(tr, m); }));
+      var tdR = document.createElement('td');
+      tdR.appendChild(numInput(m.rab, '1', 60, function () { m.rab = parseFloat(this.value) || 0; refreshBrekr(tr, m); }));
+      var tdH = document.createElement('td'); tdH.className = 'hek-col'; tdH.textContent = euro.format(brekrHek(m));
+      var tdQ = document.createElement('td');
+      tdQ.appendChild(numInput(m.qty, '1', 60, function () { m.qty = Math.max(0, Math.round(parseFloat(this.value) || 0)); renderBrekr(); }));
+      tr.appendChild(tdN); tr.appendChild(tdU); tr.appendChild(tdR); tr.appendChild(tdH); tr.appendChild(tdQ);
+      tb.appendChild(tr);
+    });
+  }
+  function refreshBrekr(tr, m) {
+    tr.children[3].textContent = euro.format(brekrHek(m));
+    renderBrekr();
+  }
+
+  function bkDocHead(J) {
+    return '<div class="doc-head"><div class="doc-title">Händlerkonditionen BREKR DE ' + J + '</div>' +
+      '<img src="' + BREKR_LOGO + '" alt="BREKR" style="height:52px; width:auto;"></div>';
+  }
+  function bkFoot(p, t, J) {
+    return '<div class="foot"><span>BREKR · Händlerkonditionen ' + J + '</span><span>Seite ' + p + ' / ' + t + '</span></div>';
+  }
+
+  function renderBrekr() {
+    var host = $('brekrPrintArea');
+    if (!host) return;
+    var J = bkYear();
+    var withLegal = $('bk_legal').checked;
+    var withVersand = $('bk_versand').checked;
+    var total = 2 + (withLegal ? 1 : 0) + (withVersand ? 1 : 0);
+    var pn = 0;
+
+    // ---- Seite 1
+    pn++;
+    var p1 = bkDocHead(J);
+    p1 += '<h4 class="sec">Kundendaten</h4><div class="kd-grid" style="grid-template-columns:1fr 1fr;">' +
+      boxHtml('Firmenname', val('bk_firma')) + boxHtml('USt-IdNr.', val('bk_ust')) +
+      boxHtml('Adresse', val('bk_adr')) + boxHtml('Handelsreg.-Nr.', val('bk_hreg')) +
+      boxHtml('Ort', val('bk_ort')) + boxHtml('E-Mail', val('bk_mail')) +
+      boxHtml('Land', val('bk_land')) + boxHtml('Rechnungs-E-Mail', val('bk_rmail')) +
+      boxHtml('Ansprechpartner', val('bk_ansprech')) +
+      '<div class="box"><div class="bl">Lieferadresse</div><div class="bv">' + ($('bk_lief').checked ? 'Rechnungsadresse entspricht der Lieferadresse' : 'Abweichend — siehe Bemerkungen') + '</div></div>' +
+      '</div>';
+
+    var boni = [];
+    if ($('bk_b30').checked) boni.push(['&gt; 30.000 € Umsatz in ' + J, pct.format(num('bk_b30p')) + ' % auf BREKR-Nettoumsatz']);
+    if ($('bk_b60').checked) boni.push(['&gt; 60.000 € Umsatz in ' + J, pct.format(num('bk_b60p')) + ' % auf BREKR-Nettoumsatz']);
+    if ($('bk_bqwic').checked) boni.push(['Abnahme von 5 BREKR-Modellen in ' + J + ' (nur für QWIC-Händler)', pct.format(num('bk_bqwicp')) + ' % auf QWIC-Nettoumsatz']);
+    if (boni.length) {
+      p1 += '<h4 class="sec">Leistungsbonus</h4>';
+      boni.forEach(function (b) {
+        p1 += '<div class="pct-line"><span>' + b[0] + '</span><span class="p">' + b[1] + '</span></div>';
+      });
+    }
+    if ($('bk_demo').checked) {
+      p1 += '<h4 class="sec">Vorführmodelle</h4><div class="pct-line"><span>Rabatt auf 2× BREKR-Modelle</span><span class="p">7 %</span></div>';
+    }
+    if ($('bk_sepa').checked) {
+      p1 += '<h4 class="sec">Lastschrift</h4><div class="pct-line"><span>Rabatt bei Zahlung innerhalb von 14 Tagen per SEPA-Lastschrift</span><span class="p">' + pct.format(num('bk_sepap')) + ' %</span></div>';
+    }
+    p1 += '<h4 class="sec">Allgemeine Geschäftsbedingungen</h4><p style="font-size:9pt;">Siehe BREKR-Händlerportal oder fragen Sie Ihren Vertreter.</p>';
+    if (val('bk_notes')) {
+      p1 += '<h4 class="sec">Bemerkungen</h4><div class="box" style="min-height:14mm;"><div class="bv" style="font-weight:400; white-space:pre-wrap;">' + esc(val('bk_notes')) + '</div></div>';
+    }
+    var datum = val('bk_datum') ? new Date(val('bk_datum') + 'T00:00:00').toLocaleDateString('de-DE') : '';
+    p1 += '<h4 class="sec">Unterschriften</h4>' +
+      '<div class="kd-grid" style="grid-template-columns:1fr 1fr;">' + boxHtml('Datum', datum) + boxHtml('Ort', val('bk_sort')) + '</div>' +
+      '<div class="sig-grid">' +
+      '<div>' + (sigData.BH ? '<img src="' + sigData.BH + '" alt="" style="height:16mm; max-width:100%; display:block;">' : '<div style="height:16mm;"></div>') + '<div class="sig"><div class="sig-name">' + esc(val('bk_signH')) + '&nbsp;</div>Vollständiger Name + Unterschrift Händler</div></div>' +
+      '<div>' + (sigData.BV ? '<img src="' + sigData.BV + '" alt="" style="height:16mm; max-width:100%; display:block;">' : '<div style="height:16mm;"></div>') + '<div class="sig"><div class="sig-name">' + esc(val('bk_signV')) + '&nbsp;</div>Vollständiger Name + Unterschrift Vertriebsmitarbeiter</div></div>' +
+      '</div>';
+    p1 += bkFoot(pn, total, J);
+
+    // ---- Seite 2: Preisliste / Bestellung
+    pn++;
+    var anyQty = BREKR_MODELLE.some(function (m) { return m.qty > 0; });
+    var p2 = bkDocHead(J) + '<h4 class="sec">Preisliste ' + J + (anyQty ? ' · Bestellung' : '') + '</h4>' +
+      '<table class="ct"><thead><tr><th style="text-align:left;">Modell</th><th>UVP inkl. MwSt.</th><th>Händlerpreis exkl. MwSt.</th><th>Rabatt</th><th>Anzahl</th>' + (anyQty ? '<th>Summe netto</th>' : '') + '</tr></thead><tbody>';
+    var lastG = '', sum = 0, sumQty = 0;
+    BREKR_MODELLE.forEach(function (m) {
+      var hk = brekrHek(m);
+      var line = m.qty > 0 ? hk * m.qty : 0;
+      sum += line; sumQty += m.qty;
+      p2 += '<tr' + (m.qty > 0 ? ' class="chosen"' : '') + '><td>' + (m.g !== lastG ? '<strong>' + m.g + '</strong><br>' : '') + esc(m.n) + '</td>' +
+        '<td style="text-align:right;">' + euro.format(m.uvp) + '</td>' +
+        '<td style="text-align:right;">' + euro.format(hk) + '</td>' +
+        '<td style="text-align:right;">' + pct.format(m.rab) + ' %</td>' +
+        '<td style="text-align:right;">' + (m.qty > 0 ? m.qty : '—') + '</td>' +
+        (anyQty ? '<td style="text-align:right;">' + (m.qty > 0 ? euro.format(Math.round(line * 100) / 100) : '') + '</td>' : '') + '</tr>';
+      lastG = m.g;
+    });
+    p2 += '</tbody></table>';
+    if (anyQty) {
+      p2 += '<div class="total-marge"><span>Bestellwert netto (' + sumQty + ' Stk.)</span><span>' + euro.format(Math.round(sum * 100) / 100) + '</span></div>';
+    }
+    p2 += '<p class="note-sm">Alle Händlerpreise exkl. MwSt. Berechnung: UVP ÷ 1,19 × (1 − Rabatt).</p>';
+    p2 += bkFoot(pn, total, J);
+
+    // ---- Seite 3: Rechtstext
+    var p3 = '';
+    if (withLegal) {
+      pn++;
+      p3 = bkDocHead(J) + '<h4 class="sec">Händlerkonditionen BREKR DE ' + J + ' – Vertragsbedingungen</h4><div class="legal">' +
+      '<p>Diese Händlerkonditionen sind Bestandteil des vorliegenden Vertrags. Darüber hinaus gelten für diesen Vertrag die allgemeinen Verkaufs- und Lieferbedingungen von BREKR, die als integraler Bestandteil dieses Vertrags gelten (die „Allgemeinen Geschäftsbedingungen“). Die aktuellen Allgemeinen Geschäftsbedingungen sind im BREKR-Händlerportal veröffentlicht und können auf Anfrage von Ihrem BREKR-Vertreter zugesandt werden. Sollten diese Händlerkonditionen von den Allgemeinen Geschäftsbedingungen abweichen oder ihnen widersprechen, haben die Händlerkonditionen Vorrang. Mit der Unterzeichnung dieses Vertrags erklären Sie, von den Händlerkonditionen und den Allgemeinen Geschäftsbedingungen von BREKR Kenntnis genommen zu haben und diese zu akzeptieren.</p>' +
+      '<h5>Allgemeines</h5>' +
+      '<p>1. BREKR behält sich das Recht vor, die finanziellen Vereinbarungen im Laufe des Jahres anzupassen, wenn nach ihrem angemessenen Ermessen die Umsatzziele für das laufende Jahr nicht erreicht werden.</p>' +
+      '<p>2. Die Händlervereinbarung gilt ausschließlich für die BREKR bekannte Adresse des Geschäfts, Showrooms oder Auslieferungspunkts. Ändert sich diese Adresse oder kommt eine weitere Adresse hinzu, muss hierfür eine neue Händlervereinbarung abgeschlossen werden.</p>' +
+      '<p>3. Alle Preise sind unverbindliche Preisempfehlungen (UVP) inkl. MwSt., sofern nicht anders angegeben.</p>' +
+      '<p>4. Sobald dieser Vertrag endet, gleich aus welchem Grund, ist der Händler verpflichtet, unverzüglich jegliches Marketing und jeglichen Verkauf der Produkte einzustellen, bei dem er sich als (autorisierter) Händler und/oder bevorzugter Lieferant von BREKR präsentiert, sowie alles zu unterlassen, was den Eindruck erwecken könnte, dass der Händler diesen Status noch innehat.</p>' +
+      '<h5>Marketing und Präsentation</h5>' +
+      '<p>5. Der Händler beschäftigt Mitarbeiter, die über die aktuellsten Informationen zu den Eigenschaften sowie zur richtigen und verantwortungsvollen Nutzung der BREKR-Produkte gut informiert sind. Sie nehmen an den von BREKR geforderten verfügbaren technischen und kaufmännischen Schulungen teil.</p>' +
+      '<p>6. Der Händler präsentiert die BREKR-Produkte auf attraktive Weise (offline und online). Er bewirbt die Produkte aktiv, im Einklang mit dem Image der Produkte, und befolgt dabei die Marketinganweisungen von BREKR.</p>' +
+      '<p>7. Der Händler verpflichtet sich, aktiv aktuelle Versionen von Dokumenten zu den BREKR-Produkten, wie Broschüren, Handbücher und verfügbares POS-Material, unter seinen Besuchern und Kunden sowie online zu verbreiten.</p>' +
+      '<p>8. Der Händler verwendet alle Produktbilder, die BREKR über das Händlerportal zur Verfügung stellt. Dies gilt sowohl für das Geschäft als auch für die eigene Website und (digitale) Plattformen Dritter.</p>' +
+      '<h5>Sortiment, Preise und Zahlung</h5>' +
+      '<p>9. BREKR ist nicht verpflichtet, ihr gesamtes Sortiment einem Händler zum (Weiter-)Verkauf anzubieten.</p>' +
+      '<p>10. BREKR ist berechtigt, die in den BREKR-Produkten verwendeten Komponenten, Materialien oder Rohstoffe jederzeit zu ändern oder anzupassen. BREKR ist in einem solchen Fall nicht zur Zahlung von Schadensersatz oder zur Rücknahme der gelieferten Produkte verpflichtet.</p>' +
+      '<p>11. Obwohl BREKR empfiehlt, die unverbindlichen Preisempfehlungen (UVP) anzuwenden, steht es dem Händler frei, seine eigenen Verkaufspreise und Rabatte festzulegen. Es ist jedoch nicht gestattet, Preise und Rabatte (offline und/oder online) auf eine Weise darzustellen, die dem Image und der Markenpositionierung der BREKR-Produkte schadet.</p>' +
+      '<p>12. BREKR gewährt eine Zahlungsfrist von 14 Tagen nach Rechnungsdatum, sofern nicht ausdrücklich schriftlich etwas anderes vereinbart wurde.</p>' +
+      '<h5>Stornierung, Ablehnung und Verschiebung von Bestellungen</h5>' +
+      '<p>13. Bestellungen von E-Bikes und E-Bikes mit Akku können innerhalb von zwei Werktagen nach dem Bestelldatum kostenlos storniert werden (sofern und soweit die Bestellung noch nicht versandt wurde).</p>' +
+      '<p>14. Der Händler ist verpflichtet, die bestellten BREKR-Produkte zu dem Zeitpunkt entgegenzunehmen, zu dem sie ihm zur Verfügung gestellt oder an ihn geliefert werden. Verweigert der Händler die Annahme aus welchem Grund auch immer oder versäumt er es, die für die Lieferung erforderlichen Informationen oder Anweisungen bereitzustellen, werden die BREKR-Produkte auf Rechnung und Gefahr des Händlers eingelagert. Der Händler schuldet in diesem Fall neben dem Kaufpreis auch die Kosten für die Lagerung der BREKR-Produkte. Etwaige entstandene Transport- und Lagerkosten werden von BREKR direkt an den Händler weiterberechnet.</p>' +
+      '<p>15. Bei Verweigerung der Anlieferung an der Tür wird die Lieferung zum nächstmöglichen verfügbaren Liefertermin auf Kosten des Händlers erneut angeboten.</p>' +
+      '<p>16. Die Rückgabe von Produkten ist nur in Ausnahmefällen möglich (und liegt stets vollständig im Ermessen von BREKR) und erfolgt gegen maximal 90 % des Einkaufswerts.</p>' +
+      '<p>17. Bestellungen können einmalig kostenlos auf einen späteren Liefertermin verschoben werden, sofern die Bestellung noch nicht versandt wurde und die spätere Lieferung innerhalb desselben Vertragszeitraums erfolgt.</p>' +
+      '<p>18. Aufgegebene Bestellungen können nicht widerrufen, mehr als einmal verschoben oder storniert werden, ohne dass BREKR vorher schriftlich zugestimmt hat. BREKR kann die Zustimmung zu einer Stornierung oder Verschiebung einer Bestellung in ein neues Vertragsjahr von Stornierungskosten von bis zu 10 % des ursprünglichen Bestellwerts abhängig machen.</p>' +
+      '<h5>Bonusregelung</h5>' +
+      '<p>19. Bei strukturell schlechtem Zahlungsverhalten behält sich BREKR jederzeit das Recht vor, keinen oder einen geringeren Bonus auszuzahlen.</p>' +
+      '<p>20. Wird eine Forderung zur Inkassobearbeitung übergeben, entfällt unmittelbar jeglicher Anspruch auf einen Bonus.</p>' +
+      '<p>21. Der Händler stimmt einer direkten Anbindung an sein Kassensystem sowie der Einsichtnahme in die entsprechenden Verkaufsdaten zu. Dies gibt BREKR Einblick in die Verkäufe ihrer Produkte und dient der Förderung des Absatzes sowohl für den Händler als auch für BREKR.</p>' +
+      '</div>' + bkFoot(pn, total, J);
+    }
+
+    // ---- Seite 4: Versandkosten
+    var p4 = '';
+    if (withVersand) {
+      pn++;
+      p4 = bkDocHead(J) + '<h4 class="sec">Anlage: Versandkosten für BREKR-Fahrzeuge ' + J + '</h4>' +
+      '<h3 style="font-size:11pt; margin:4mm 0 2mm;">F250 – Versandkosten (DE)</h3>' +
+      '<table class="ct"><thead><tr><th style="text-align:left;">Anzahl Fahrzeuge</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>&gt; 6</th></tr></thead>' +
+      '<tbody><tr><td>Preis pro Sendung</td><td style="text-align:right;">75 €</td><td style="text-align:right;">130 €</td><td style="text-align:right;">180 €</td><td style="text-align:right;">230 €</td><td style="text-align:right;">275 €</td><td style="text-align:right;">+ 45 € pro Fahrzeug</td></tr></tbody></table>' +
+      '<p class="note-sm">Preis pro Sendung im Karton (1950 × 250 × 1000 mm / 32 kg), alle Preise zzgl. MwSt. Preise für mehr als 10 Fahrräder auf Anfrage.</p>' +
+      '<h3 style="font-size:11pt; margin:6mm 0 2mm;">B4000 – Versandkosten (DE)</h3>' +
+      '<table class="ct"><thead><tr><th style="text-align:left;">Land</th><th>Preis pro Fahrzeug (1–3 Fahrzeuge)</th></tr></thead>' +
+      '<tbody><tr><td>DE</td><td style="text-align:right;">165 €</td></tr></tbody></table>' +
+      '<p class="note-sm">Preis pro Sendung auf Palette (1900 × 650 × 1100 mm / 90 kg), alle Preise zzgl. MwSt. Preise für mehr als drei B4000-Fahrzeuge auf Anfrage.</p>' +
+      bkFoot(pn, total, J);
+    }
+
+    host.innerHTML = '<div class="sheet">' + p1 + '</div><div class="sheet">' + p2 + '</div>' +
+      (p3 ? '<div class="sheet">' + p3 + '</div>' : '') + (p4 ? '<div class="sheet">' + p4 + '</div>' : '');
+    var cw = host.parentElement.clientWidth;
+    host.style.zoom = Math.min(1, cw / 800);
+  }
+
+  // Brekr-Händlersuche
+  (function buildBrekrSearch() {
+    var inp = $('bk_dealerSearch');
+    var list = $('brekrResults');
+    var current = [];
+    function close() { list.classList.remove('open'); list.innerHTML = ''; current = []; }
+    function fill(d) {
+      $('bk_firma').value = d.n;
+      $('bk_mail').value = d.e;
+      $('bk_ort').value = (d.p ? d.p + ' ' : '') + d.c;
+      inp.value = d.n;
+      close();
+      renderBrekr();
+    }
+    inp.addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      if (!q) { close(); return; }
+      var pre = [], sub = [];
+      DEALERS.forEach(function (d) {
+        var n = d.n.toLowerCase(), k = d.k.toLowerCase(), c = (d.c || '').toLowerCase();
+        if (n.indexOf(q) === 0 || k.indexOf(q) === 0) pre.push(d);
+        else if (n.indexOf(q) > 0 || c.indexOf(q) === 0) sub.push(d);
+      });
+      current = pre.concat(sub).slice(0, 12);
+      list.innerHTML = '';
+      if (!current.length) {
+        var e = document.createElement('div'); e.className = 'dd-empty';
+        e.textContent = 'Kein Treffer — Felder unten manuell ausfüllen.';
+        list.appendChild(e);
+      } else {
+        current.forEach(function (d) {
+          var it = document.createElement('div');
+          it.className = 'dd-item';
+          it.innerHTML = '<strong>' + esc(d.n) + '</strong><small>' + esc(d.k) + (d.c ? ' · ' + esc((d.p ? d.p + ' ' : '') + d.c) : '') + '</small>';
+          it.addEventListener('pointerdown', function (ev) { ev.preventDefault(); fill(d); });
+          list.appendChild(it);
+        });
+      }
+      list.classList.add('open');
+    });
+    inp.addEventListener('blur', function () { setTimeout(close, 150); });
+    inp.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); if (current.length) fill(current[0]); }
+      else if (ev.key === 'Escape') { close(); }
+    });
+  })();
+
+  // Brekr-Listener
+  ['bk_jahr','bk_firma','bk_ust','bk_adr','bk_hreg','bk_ort','bk_mail','bk_land','bk_rmail','bk_ansprech',
+   'bk_b30p','bk_b60p','bk_bqwicp','bk_sepap','bk_notes','bk_datum','bk_sort','bk_signH','bk_signV'].forEach(function (id) {
+    var el = $(id);
+    if (el) { el.addEventListener('input', renderBrekr); el.addEventListener('change', renderBrekr); }
+  });
+  ['bk_lief','bk_b30','bk_b60','bk_bqwic','bk_demo','bk_sepa','bk_legal','bk_versand'].forEach(function (id) {
+    $(id).addEventListener('change', renderBrekr);
+  });
+  $('bk_jahr').addEventListener('input', function () {
+    var J = bkYear();
+    $('lbl_bk30').innerHTML = '&gt; 30.000 € Umsatz in ' + J + ' — auf BREKR-Nettoumsatz';
+    $('lbl_bk60').innerHTML = '&gt; 60.000 € Umsatz in ' + J + ' — auf BREKR-Nettoumsatz';
+    $('lbl_bkqwic').textContent = 'Abnahme von 5 BREKR-Modellen in ' + J + ' — auf QWIC-Nettoumsatz (nur für QWIC-Händler)';
+  });
+  $('brekrPdfBtn').addEventListener('click', function () {
+    document.body.setAttribute('data-print', 'brekr');
+    renderBrekr();
+    window.print();
+  });
+
   $('pdfBtn').addEventListener('click', function () {
     document.body.removeAttribute('data-print');
     renderContract();
@@ -1453,6 +1820,9 @@
   $('c_datum').value = today.toISOString().slice(0, 10);
   $('s_datum').value = today.toISOString().slice(0, 10);
   updateYearLabels();
+  $('bk_datum').value = today.toISOString().slice(0, 10);
+  renderBrekrTable();
+  renderBrekr();
   renderSepa();
   renderSelect();
   calc();
