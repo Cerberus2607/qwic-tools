@@ -220,6 +220,33 @@
   .wb-toolbar select { width: auto; min-width: 130px; }
   .wb-page { width: 100%; display: block; margin-bottom: 14px; border-radius: 6px; background: #fff; box-shadow: 0 2px 14px rgba(0,0,0,.3); }
 
+  #legalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 100; padding: 4vh 16px; overflow-y: auto; }
+  #legalOverlay.open { display: block; }
+  .legal-modal { max-width: 760px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 28px; position: relative; font-size: 14px; line-height: 1.6; }
+  .legal-modal h2 { font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin: 22px 0 10px; }
+  .legal-modal h2:first-of-type { margin-top: 0; }
+  .legal-modal h3 { font-size: 14px; margin: 14px 0 6px; }
+  .legal-modal p { margin-bottom: 8px; color: var(--fg); }
+  .legal-modal .ph { color: var(--orange); font-weight: 700; }
+  .legal-close { position: absolute; top: 14px; right: 14px; background: transparent; border: 1px solid var(--line); color: var(--fg); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
+  .legal-close:hover { border-color: var(--orange); }
+  #legalPrintArea { display: none; }
+  #legalPrintArea .sheet h2 { background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase; padding: 5px 10px; margin: 6mm 0 3mm; border-left: 4px solid #f47920; }
+  #legalPrintArea .sheet h3 { font-size: 10pt; margin: 3mm 0 1mm; color: #000; }
+  #legalPrintArea .sheet p { font-size: 9pt; color: #222; margin-bottom: 2mm; }
+  #legalPrintArea .sheet .ph { color: #e05e00; font-weight: 700; }
+  #legalPrintArea .sheet a { color: #e05e00; }
+
+  footer button.flink { background: none; border: none; color: var(--muted); font-family: inherit; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; text-decoration: underline; padding: 0 6px; }
+  #legalPrintArea { display: none; }
+  #legalPrintArea .sheet h2 { background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase; padding: 5px 10px; margin: 6mm 0 3mm; border-left: 4px solid #f47920; }
+  #legalPrintArea .sheet h3 { font-size: 10pt; margin: 3mm 0 1mm; color: #000; }
+  #legalPrintArea .sheet p { font-size: 9pt; color: #222; margin-bottom: 2mm; }
+  #legalPrintArea .sheet .ph { color: #e05e00; font-weight: 700; }
+  #legalPrintArea .sheet a { color: #e05e00; }
+
+  footer button.flink:hover { color: var(--orange); }
+
   footer { text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 2px; padding: 20px; text-transform: uppercase; }
 
   /* ---------- Druck: nur Vertrag ---------- */
@@ -229,8 +256,10 @@
     body { background: #fff; }
     header, footer, .no-print, #previewTitle, #sepaPreviewTitle { display: none !important; }
     .tab-page { display: none !important; }
-    body:not([data-print="sepa"]) #tab-contract { display: block !important; }
+    body:not([data-print="sepa"]):not([data-print="legal"]) #tab-contract { display: block !important; }
     body[data-print="sepa"] #tab-sepa { display: block !important; }
+    body[data-print="legal"] #tab-contract, body[data-print="legal"] #tab-sepa { display: none !important; }
+    body[data-print="legal"] #legalPrintArea { display: block !important; }
     #tab-calc, #tab-workbook { display: none !important; }
     #sepaPrintArea { zoom: 1 !important; margin: 0; }
     main { max-width: none; padding: 0; }
@@ -248,7 +277,7 @@
   <svg class="logo" viewBox="247 498 721 182" xmlns="http://www.w3.org/2000/svg" aria-label="QWIC"><path class="lg-m" d="M 278.921874667,498.880208 C 261.526041333,498.880208 247.453125333,512.958333333 247.453125333,530.343749333 L 247.453125333,648.343749333 C 247.453125333,665.734374667 261.526041333,679.807292 278.921874667,679.807292 L 376.036458667,679.807292 L 336.708333333,640.479166667 L 294.651041333,640.479166667 C 290.296874667,640.479166667 286.781250667,636.958333333 286.781250667,632.609374667 L 286.781250667,546.078125333 C 286.781250667,541.729166667 290.296874667,538.213541333 294.651041333,538.213541333 L 396.911458667,538.213541333 C 401.260416,538.213541333 404.776041333,541.729166667 404.776041333,546.078125333 L 404.776041333,619.5 L 444.109374667,658.828125333 L 444.109374667,530.348958667 C 444.109374667,512.958333333 430.036458667,498.880208 412.645833333,498.880208 Z M 278.921874667,498.880208"/><path class="lg-m" d="M 483.838541333,680.036458666 L 679.052082666,680.036458666 C 696.447917333,680.036458666 710.520833333,665.963541333 710.520833333,648.572917333 L 710.520833333,499.114584 L 671.1875,499.114584 L 671.1875,632.843749333 C 671.1875,637.1875 667.666666666,640.708333333 663.317708,640.708333333 L 612.1875,640.708333333 L 612.1875,499.114584 L 572.859374667,499.114584 L 572.859374667,640.708333333 L 513.864584,640.708333333 L 513.864584,499.114584 L 474.526041333,499.114584 L 474.526041333,680.036458666 Z M 483.838541333,680.036458666"/><path class="lg-m" d="M 741.031250666,679.411458666 L 780.359374666,679.411458666 L 780.359374666,498.489584 L 741.031250666,498.489584 Z M 741.031250666,679.411458666"/><path class="lg-m" d="M 850.109374666,546.1875 C 850.109374666,541.843749333 853.625,538.322917333 857.973958666,538.322917333 L 968.098958666,538.322917333 L 968.098958666,498.994792 L 842.239584,498.994792 C 824.848958666,498.994792 810.776041333,513.067708 810.776041333,530.458333333 L 810.776041333,648.447917333 C 810.776041333,665.843749333 824.848958666,679.916666666 842.239584,679.916666666 L 968.098958666,679.916666666 L 968.098958666,640.583333333 L 857.973958666,640.583333333 C 853.625,640.583333333 850.109374666,637.067708 850.109374666,632.718749333 Z M 850.109374666,546.1875"/><path class="lg-o" d="M 342.151041333,625.104166667 L 391.348958667,674.302082666 C 394.416666667,677.369792 400.473958667,679.875 404.8125,679.875 L 436.354166667,679.875 C 440.6875,679.875 441.729166667,677.369792 438.661458667,674.302082666 L 389.463541333,625.104166667 C 386.395833333,622.036458667 380.338541333,619.526041333 376.005208,619.526041333 L 344.463541333,619.526041333 C 340.125,619.526041333 339.083333333,622.036458667 342.151041333,625.104166667"/></svg>
   <div class="subtitle">Händler-Tools</div>
   <nav class="tabs no-print">
-    <button id="tabBtnContract" class="active">Vertragserstellung 2027</button>
+    <button id="tabBtnContract" class="active">Vertragserstellung</button>
     <button id="tabBtnSepa">SEPA-Mandat</button>
     <button id="tabBtnCalc">Kalkulationstool</button>
     <button id="tabBtnWorkbook">Dealer Workbook</button>
@@ -264,18 +293,22 @@
 
     <div class="card no-print">
       <h2>Kundendaten</h2>
+      <label for="c_dealerSel">Händler auswählen</label>
+      <select id="c_dealerSel"></select>
       <div class="row2">
+        <div><label>Vertragsjahr</label><input type="number" id="c_jahr" min="2026" max="2040" step="1" value="2027"></div>
         <div><label>Kundennummer</label><input type="text" id="c_kdnr"></div>
+      </div>
+      <div class="row2">
         <div><label>Händlername</label><input type="text" id="c_haendler"></div>
-      </div>
-      <div class="row2">
         <div><label>E-Mail</label><input type="email" id="c_email"></div>
-        <div><label>Stadt</label><input type="text" id="c_stadt"></div>
       </div>
       <div class="row2">
+        <div><label>Stadt mit Postleitzahl</label><input type="text" id="c_stadt"></div>
         <div><label>Geschäftsführer</label><input type="text" id="c_gf"></div>
-        <div><label>Jahresziel Umsatz netto (€, optional)</label><input type="number" id="c_ziel" min="0" step="500"></div>
       </div>
+      <label>Jahresziel Umsatz netto (€, optional)</label>
+      <input type="number" id="c_ziel" min="0" step="500">
 
       <h3>Händlerschaft</h3>
       <div class="checkline"><input type="radio" name="htyp" id="ht_xl" value="xl"><div class="cl-body"><strong>XL Händler</strong><small>6 Modelle im Verkaufsraum, 30 Räder/Filiale, bis zu 8 Demo-Bikes mit 7 %, Dealerfinder + Landingpage</small></div></div>
@@ -303,14 +336,14 @@
 
       <h3>KPI</h3>
       <div class="checkline"><input type="checkbox" id="k_pos" checked><div class="cl-body">Markenpräsenz: Erstbestellung mind. 4 Fahrräder inkl. POS-Material</div><div class="pct"><input type="number" id="k_pos_p" value="0" step="0.5" min="0" title="+ KPI %"></div></div>
-      <div class="checkline"><input type="checkbox" id="k_vor" checked><div class="cl-body">Planung: Bis 31.12.2026 mind. 30 % des Umsatzziels als Vorbestellung bis 01.09.2027</div><div class="pct"><input type="number" id="k_vor_p" value="1" step="0.5" min="0"></div></div>
-      <div class="checkline"><input type="checkbox" id="k_aus" checked><div class="cl-body">Planung: Bis 01.07.2027 mind. 40 % des Umsatzziels ausgeliefert</div><div class="pct"><input type="number" id="k_aus_p" value="1" step="0.5" min="0"></div></div>
+      <div class="checkline"><input type="checkbox" id="k_vor" checked><div class="cl-body" id="lbl_k_vor">Planung: Bis 31.12.2026 mind. 30 % des Umsatzziels als Vorbestellung bis 01.09.2027</div><div class="pct"><input type="number" id="k_vor_p" value="1" step="0.5" min="0"></div></div>
+      <div class="checkline"><input type="checkbox" id="k_aus" checked><div class="cl-body" id="lbl_k_aus">Planung: Bis 01.07.2027 mind. 40 % des Umsatzziels ausgeliefert</div><div class="pct"><input type="number" id="k_aus_p" value="1" step="0.5" min="0"></div></div>
 
       <h3>Zahlungsbedingungen</h3>
       <div class="checkline"><input type="checkbox" id="k_sepa" checked><div class="cl-body">Zahlung per automatischem Lastschrifteinzug innerhalb von 14 Tagen</div><div class="pct"><input type="number" id="k_sepa_p" value="1" step="0.5" min="0"></div></div>
 
       <h3>Bonus</h3>
-      <div class="checkline"><input type="checkbox" id="b_brekr" checked><div class="cl-body"><strong>Brekr Bonus</strong><small>Mind. 5 Brekr-Räder in 2027 geliefert</small></div><div class="pct"><input type="number" id="b_brekr_p" value="1" step="0.5" min="0"></div></div>
+      <div class="checkline"><input type="checkbox" id="b_brekr" checked><div class="cl-body"><strong>Brekr Bonus</strong><small id="lbl_brekr">Mind. 5 Brekr-Räder in 2027 geliefert</small></div><div class="pct"><input type="number" id="b_brekr_p" value="1" step="0.5" min="0"></div></div>
 
       <h3>Demo-Modelle</h3>
       <div class="checkline"><input type="checkbox" id="d_demo" checked><div class="cl-body">7 % Rabatt auf Demo-Modelle (Anzahl je nach Händlerschaft)</div></div>
@@ -556,7 +589,75 @@
 
 </main>
 
-<footer>QWIC Händler-Kalkulation · HEK = (UVP ÷ 1,19) × (1 − Marge)</footer>
+<footer class="no-print">
+  QWIC Händler-Tools ·
+  <button class="flink" id="openImpressum">Impressum</button> ·
+  <button class="flink" id="openDatenschutz">Datenschutz</button>
+</footer>
+
+<div id="legalOverlay" class="no-print">
+  <div class="legal-modal">
+    <button class="legal-close" id="legalClose">Schließen ✕</button>
+    <button class="btn" id="legalPdfBtn" style="margin-bottom:16px;">Als PDF drucken</button>
+
+    <div id="legalImpressum">
+      <h2>Impressum</h2>
+      <p>Angaben gemäß § 5 DDG</p>
+      <p>QWIC B.V.<br>
+      Disketteweg 53<br>
+      1033 NW Amsterdam<br>
+      Niederlande</p>
+      <p>Vertreten durch: <span class="ph">[Geschäftsführer eintragen]</span><br>
+      Kontakt: <span class="ph">[Telefon]</span> · <span class="ph">[E-Mail]</span></p>
+      <p>Registereintrag: Kamer van Koophandel (KvK), Nr. <span class="ph">71933891 [bitte verifizieren]</span><br>
+      Umsatzsteuer-ID: <span class="ph">[BTW-/USt-IdNr. eintragen]</span></p>
+    </div>
+
+    <div id="legalDatenschutz">
+      <h2>Datenschutzerklärung</h2>
+
+      <h3>1. Verantwortlicher</h3>
+      <p>QWIC B.V.<br>
+      Disketteweg 53<br>
+      1033 NW Amsterdam, Niederlande<br>
+      E-Mail: <span class="ph">[E-Mail eintragen]</span></p>
+
+      <h3>2. Hosting (GitHub Pages)</h3>
+      <p>Diese Anwendung wird über GitHub Pages bereitgestellt, einen Dienst der GitHub, Inc.,
+      88 Colin P Kelly Jr St, San Francisco, CA 94107, USA. Beim Aufruf der Seite verarbeitet
+      GitHub technisch notwendige Daten, insbesondere die IP-Adresse, in Server-Logfiles
+      (Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO — berechtigtes Interesse an der sicheren
+      Bereitstellung der Anwendung). GitHub ist unter dem EU-US Data Privacy Framework
+      zertifiziert. Weitere Informationen:
+      <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener" style="color:var(--orange);">GitHub Privacy Statement</a>.</p>
+
+      <h3>3. Verarbeitung Ihrer Eingaben — ausschließlich lokal</h3>
+      <p>Alle Daten, die Sie in dieser Anwendung eingeben (Kalkulationswerte, Vertragsdaten,
+      Bankverbindungen im SEPA-Mandat, gezeichnete Unterschriften), werden ausschließlich
+      lokal in Ihrem Browser verarbeitet. Es findet keine Übertragung an einen Server statt.
+      PDF-Dokumente werden lokal auf Ihrem Gerät erzeugt.</p>
+
+      <h3>4. Lokale Speicherung (localStorage)</h3>
+      <p>Die Anwendung speichert Einstellungen (Farbmodus) und die bearbeitbare Modell-Liste
+      im localStorage Ihres Browsers. Diese Daten verbleiben auf Ihrem Gerät und können durch
+      Löschen der Browserdaten jederzeit entfernt werden. Es werden keine Cookies gesetzt und
+      keine Analyse- oder Tracking-Dienste eingesetzt.</p>
+
+      <h3>5. Ihre Rechte</h3>
+      <p>Sie haben nach der DSGVO das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16),
+      Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit
+      (Art. 20) sowie Widerspruch (Art. 21). Zudem besteht ein Beschwerderecht bei einer
+      Datenschutz-Aufsichtsbehörde (Art. 77 DSGVO).</p>
+
+      <p style="color:var(--muted); font-size:12px; margin-top:14px;">Stand: Juli 2026.
+      Diese Vorlage ersetzt keine Rechtsberatung — bitte vor Veröffentlichung die mit
+      <strong style="color:var(--orange);">[…]</strong> markierten Platzhalter ausfüllen und
+      juristisch prüfen lassen.</p>
+    </div>
+  </div>
+</div>
+
+<div id="legalPrintArea"></div>
 
 <script>
 (function () {
@@ -957,7 +1058,61 @@
     setup();
   }
 
-  var contractInputs = ['c_kdnr','c_haendler','c_email','c_stadt','c_gf','c_ziel','c_freiMarge','c_staffelSel',
+  // ---------- Händlerliste (Region Nord, Stand 22.07.2026) ----------
+  var DEALERS = [{"k": "K26111", "n": "1817 Bünger Bikes GmbH", "p": "49393", "c": "Lohne", "e": "stephan@1817-buenger-bikes.de"}, {"k": "K12046", "n": "2 Rad Center Priem", "p": "37603", "c": "Holzminden", "e": "zweirad-priem@t-online.de"}, {"k": "K21136", "n": "2 Rad Kestermann Inh. Kaute Isfort e.K.", "p": "48683", "c": "Ahaus", "e": "info@fahrrad-kestermann.de"}, {"k": "K16916", "n": "2-Rad Nettelbeck", "p": "47918", "c": "Tönisvorst", "e": "info@zweirad-nettelbeck.de"}, {"k": "K09176", "n": "2-Rad Service André Sicking", "p": "46354", "c": "Südlohn", "e": "a.sicking@gmx.de"}, {"k": "K21354", "n": "2-Rad Shop Roesebeck GbR", "p": "34434", "c": "Borgentreich", "e": "zweiradshoproesebeck@t-online.de"}, {"k": "K12926", "n": "2Rad Berger", "p": "32549", "c": "Bad Oeynhausen", "e": "info@2radberger.de"}, {"k": "K08096", "n": "2Rad Eilmes - Der Fahrradspezialist", "p": "29303", "c": "Bergen", "e": "info@profi2rad-eilmes.de"}, {"k": "K21302", "n": "2Rad Krax", "p": "33415", "c": "Verl", "e": "info@2rad-krax.de"}, {"k": "K11656", "n": "2rad Schulze", "p": "04177", "c": "Leipzig", "e": "info@2rad-laden.de"}, {"k": "K21575", "n": "2Rad-Mitschke", "p": "56076", "c": "Koblenz-Pfaffendorf", "e": "service@zweirad-mitschke.de"}, {"k": "K21148", "n": "2Radservice Nückel", "p": "59379", "c": "Selm", "e": "zweiradservice-nueckel@gmx.de"}, {"k": "K25055", "n": "A7 Bikestore Fulda", "p": "36043", "c": "Fulda", "e": "fulda@a7-bikestore.com"}, {"k": "K25056", "n": "A7 Bikestore Uttrichshausen", "p": "36148", "c": "Uttrichshausen/Kalbach", "e": "info@a7-bikestore.com"}, {"k": "K16976", "n": "Alberto Bikes", "p": "48527", "c": "Nordhorn", "e": "alberto.fernandes@gmx.de"}, {"k": "K21024", "n": "Antritt Radwerkstatt", "p": "40724", "c": "Hilden", "e": "sven.alkenings@gmail.com"}, {"k": "K12016", "n": "August Konermann GmbH & Co. KG", "p": "49477", "c": "Ibbenbüren", "e": "zweirad-konermann@osnanet.de"}, {"k": "K26118", "n": "Auto Kuffer", "p": "84089", "c": "Aiglsbach", "e": "walter.kuffer@web.de"}, {"k": "K25214", "n": "Autohaus Dahmen GmbH", "p": "52372", "c": "Kreuzau", "e": "udahmen@autodahmen.de"}, {"k": "K25974", "n": "Autohaus Güde GmbH & Co. KG", "p": "34466", "c": "Wolfhagen", "e": "geschaeftsleitung@autohausguede.fsoc.de"}, {"k": "K25368", "n": "Autohaus Jensen Wittstock GmbH", "p": "16909", "c": "Wittstock", "e": "i.lehmann@jensen-wittstock.de"}, {"k": "K05636", "n": "Bartels-Bikes GmbH", "p": "28355", "c": "Bremen", "e": "info@bartels-oberneuland.de"}, {"k": "K21185", "n": "Berger Bike", "p": "86836", "c": "Lagerlechfeld", "e": "bike@sportberger.net"}, {"k": "K26526", "n": "Bike Monkey", "p": "60528", "c": "Frankfurt", "e": "ejder@bike-monkey-frankfurt.de"}, {"k": "K25065", "n": "Bike950 GmbH", "p": "36129", "c": "Gersfeld", "e": "info@bike950.de"}, {"k": "K16906", "n": "Bikegarage Sachsen", "p": "01900", "c": "Hauswalde", "e": "info@bikegarage-sachsen.de"}, {"k": "K21384", "n": "BikePlus Fahrradmarkt", "p": "02763", "c": "Zittau", "e": "scharfbike@gmx.de"}, {"k": "K25265", "n": "Biker Stable Gmbh & Co. Kg", "p": "86738", "c": "Deiningen", "e": "verkauf@ebiker-stable.de"}, {"k": "K21458", "n": "Bikes & Wheels Fahrräder und Zubehör", "p": "28309", "c": "Bremen", "e": "info@bikes-wheels.de"}, {"k": "K24731", "n": "Bikes and More", "p": "73460", "c": "Hüttlingen", "e": "kontakt@bikesandmoreshop.de"}, {"k": "K25897", "n": "Bikestation Seebach", "p": "99846", "c": "Seebach", "e": "info@bike-seebach.de"}, {"k": "K26817", "n": "Biking Shop Erwitte", "p": "59597", "c": "Erwitte", "e": "info@biking-shop-erwitte.de"}, {"k": "K25629", "n": "cbs Service-Hub Kaiserslautern SH67", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K24913", "n": "Clemens Hoping GmbH", "p": "49456", "c": "Bakum", "e": "ebikes@hoping.de"}, {"k": "K21351", "n": "company bike solutions GmbH", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21367", "n": "company bike solutions Service-Hub Augsburg", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21378", "n": "company bike solutions Service-Hub Berlin", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21375", "n": "company bike solutions Service-Hub Bielefeld", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21377", "n": "company bike solutions Service-Hub Bodensee SH880", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21370", "n": "company bike solutions Service-Hub Edewecht SH44", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21373", "n": "company bike solutions Service-Hub Griesheim", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21374", "n": "company bike solutions Service-Hub Hamburg SH40", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21372", "n": "company bike solutions Service-Hub Köln SH20", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21385", "n": "company bike solutions Service-Hub Nürnberg", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21371", "n": "company bike solutions Service-Hub Oberhausen SH46", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21368", "n": "company bike solutions Service-Hub Plauen", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K21376", "n": "company bike solutions Service-Hub Stuttgart SH70", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K16786", "n": "Das Radhaus Böhn", "p": "67069", "c": "Ludwigshafen am Rhein", "e": "fahrrad-boehn@posteo.de"}, {"k": "K21438", "n": "Der Fahrradladen", "p": "46535", "c": "Dinslaken", "e": "der-fahrradladen@t-online.de"}, {"k": "K18076", "n": "Der Fahrradladen Ha& Pe Bicycle GmbH", "p": "34281", "c": "Gudensberg", "e": "info@der-fahrradladen.de"}, {"k": "K17706", "n": "Der Fahrradladen Neef", "p": "26723", "c": "Emden", "e": "info@fahrradladen-neef.de"}, {"k": "K26451", "n": "Der Fahrradspezialist Potreck", "p": "48683", "c": "Ahaus", "e": "service@profile-potreck.de"}, {"k": "K24699", "n": "Der Radgeber", "p": "27639", "c": "Wurster Nordseeküste", "e": "maikvonharten@yahoo.de"}, {"k": "K21464", "n": "Det's Fahrradshop", "p": "47475", "c": "Kamp-Lintfort", "e": "dets.fahrradshop@gmx.de"}, {"k": "K04956", "n": "Die Fahrrad Profis (Frank Klein)", "p": "44869", "c": "Bochum", "e": "info@diefahrradprofis.de"}, {"k": "K26844", "n": "Dietrich Happe Zweiräder e.K", "p": "45964", "c": "Gladbeck", "e": "zweirad.happe@gmx.de"}, {"k": "K21216", "n": "e-Bike Bavaria Eder und List GbR", "p": "94481", "c": "Grafenau", "e": "verwaltung@e-bike-bavaria.de"}, {"k": "K16696", "n": "E-Bike Center Magdeburg GmbH & Co.KG", "p": "39120", "c": "Magdeburg", "e": "info@ebikeverkauf.de"}, {"k": "K25449", "n": "e-bike Center Niederrhein GmbH", "p": "47533", "c": "Kleve", "e": "kleve@emotion-technologies.de"}, {"k": "K25399", "n": "e-bike Eberswalde DAB GmbH", "p": "16244", "c": "Schorfheide", "e": "gf-eberswalde@emotion-ebikes.de"}, {"k": "K26623", "n": "E-Bike Outlet France", "p": "24110", "c": "Saint-Astier", "e": "24110velo@gmail.com"}, {"k": "K21191", "n": "E-Bike Shop Gevelsberg", "p": "58285", "c": "Gevelsberg", "e": "info@ebike-shop.eu"}, {"k": "K25193", "n": "e-Bike Welt Hanau", "p": "63452", "c": "Hanau", "e": "office@ebikewelthanau.de"}, {"k": "K06126", "n": "E-Motion Bikes Struck Handelsgesellschaft mbH", "p": "21465", "c": "Wentorf bei Hamburg", "e": "hamburg@emotion-technologies.de"}, {"k": "K25549", "n": "E-Motion E Bike Welt Bremen", "p": "28277", "c": "Bremen", "e": "b.minkmar@emotion-ebikes.de"}, {"k": "K25525", "n": "e-motion e-Bike Welt Oberhausen Karl-Josef Pinger", "p": "46149", "c": "Oberhausen", "e": "k.pinger@emotion-technologies.de"}, {"k": "K05806", "n": "E.comfort-mobile GmbH", "p": "46419", "c": "ISSELBURG", "e": "avdh@comfortmobile.de"}, {"k": "K24630", "n": "Ebike Store Kaiserslautern (Jörg Beilfuß e.K.)", "p": "67661", "c": "Kaiserslautern", "e": "kontakt@ebike-store-kl.de"}, {"k": "K24690", "n": "eBike-Haus.de GmbH", "p": "04103", "c": "Leipzig", "e": "leipzig@ebike-haus.de"}, {"k": "K24923", "n": "ECUBE 3 GmbH", "p": "66497", "c": "Contwig", "e": "mail@ecube3.bike"}, {"k": "K25372", "n": "Eldorado Dirk Grimm", "p": "71277", "c": "Rutesheim", "e": "info@bike-eldorado.de"}, {"k": "K18146", "n": "Elektro Pelkmann GmbH", "p": "59269", "c": "Beckum", "e": "fahrrad@elektro-pelkmann.de"}, {"k": "K06456", "n": "Elektrorad-Partner GmbH", "p": "48329", "c": "Havixbeck", "e": "info@elektrorad-partner.de"}, {"k": "K25521", "n": "EML Köller GmbH", "p": "67547", "c": "Worms", "e": "worms@emotion.eml.de"}, {"k": "K25522", "n": "EML Köller GmbH Heidelberg", "p": "67547", "c": "Worms", "e": "heidelberg@emotion-eml.de"}, {"k": "K06736", "n": "Engel Elektromobile GmbH", "p": "63303", "c": "Dreieich", "e": "info@lautlos-durch-rhein-main.de"}, {"k": "K21126", "n": "Fahrbar Bikes GBR", "p": "87600", "c": "Kaufbeuren", "e": "kf@fahrbar-bikes.de"}, {"k": "K25217", "n": "Fahrrad Brenner", "p": "85051", "c": "Ingolstadt", "e": "info@fahrradbrenner.de"}, {"k": "K21252", "n": "Fahrrad Fiolka GmbH & Co.KG", "p": "45711", "c": "Datteln", "e": "info@fahrrad-fiolka.de"}, {"k": "K05226", "n": "Fahrrad Franssen", "p": "41462", "c": "Neuss", "e": "info@fahrrad-franssen.de"}, {"k": "K25223", "n": "Fahrrad Fuchs", "p": "36452", "c": "Kaltennordheim", "e": "fahrradfuchs-kano@t-online.de"}, {"k": "K26811", "n": "Fahrrad Station Frankfurt", "p": "60431", "c": "Frankfurt am Main", "e": "info@fahrradstation-frankfurt.de"}, {"k": "K25488", "n": "Fahrrad Thurow", "p": "23936", "c": "Grevesmuehlen", "e": "info@fahrrad-thurow.de"}, {"k": "K20696", "n": "Fahrrad Verleih Gstadt", "p": "83257", "c": "Gstadt am Chiemsee", "e": "info@fahrrad-verleih-gstadt.de"}, {"k": "K24840", "n": "Fahrrad Walter", "p": "65779", "c": "Kelkheim", "e": "info@fahrradwalter.de"}, {"k": "K26947", "n": "Fahrrad Wiedemann GmbH", "p": "33330", "c": "Gütersloh", "e": "kontakt@fahrrad-gt.de"}, {"k": "K18676", "n": "Fahrradhandlung Albert Heitmann", "p": "27726", "c": "Worpswede", "e": "albert@heitmann-fahrrad.de"}, {"k": "K07136", "n": "Fahrradhaus Haske", "p": "12555", "c": "Berlin", "e": "info@fahrrad-haske.de"}, {"k": "K13346", "n": "Fahrradhaus Pötschke", "p": "01968", "c": "Senftenberg", "e": "fahrradhaus-poetschke@gmx.de"}, {"k": "K25209", "n": "Fahrradhaus Wagner", "p": "60431", "c": "Frankfurt", "e": "info@fahrradwagner.de"}, {"k": "K16966", "n": "Fahrradhäusla", "p": "91056", "c": "Erlangen", "e": "info@fahrradhausla.de"}, {"k": "K06496", "n": "Fahrradladen am Kloster (Fahrradladen Krefeld)", "p": "47803", "c": "Krefeld", "e": "info@rad-krefeld.de"}, {"k": "K20336", "n": "Fahrradland Falkensee Inh.: Raoul-Bastian Marschke", "p": "14612", "c": "Falkensee", "e": "fahrradland@web.de"}, {"k": "K25294", "n": "Fahrradtechnik Deschka", "p": "36199", "c": "Rotenburg", "e": "gregor.deschka@t-online.de"}, {"k": "K26088", "n": "Fahrradverleih Nahlen", "p": "56814", "c": "Beilstein", "e": "fahrradverleih@nahlen.eu"}, {"k": "K26756", "n": "Fahrwerk Timmer GmbH", "p": "49808", "c": "Lingen", "e": "info@fahrwerk.me"}, {"k": "K12346", "n": "Feine Räder Barmstedt", "p": "25355", "c": "Barmstedt", "e": "barmstedt@feineraeder.de"}, {"k": "K21342", "n": "Flo's Fahrradschuppen Florian Hottenrott", "p": "14913", "c": "Jüterbog", "e": "info@flosfahrradschuppen.de"}, {"k": "K25997", "n": "Fricke E-Bike GmbH Ismaning", "p": "85435", "c": "Erding", "e": "mjfricke@emotion-ebikes.de"}, {"k": "K25152", "n": "Grabfeld-Tourismus UG", "p": "97631", "c": "Bad Königshofen", "e": "info@grabfeld-tourismus.de"}, {"k": "K07286", "n": "Haases Bike Factory", "p": "26180", "c": "Rastede", "e": "bikefactory@ewe.net"}, {"k": "K21288", "n": "Heider Fahrradhaus", "p": "25746", "c": "Heide", "e": "info@heider-fahrradhaus.de"}, {"k": "K24934", "n": "Heinrich Klugkist GmbH", "p": "26826", "c": "Weener", "e": "fahrrad@fahrzeughaus-klugkist.de"}, {"k": "K16476", "n": "Helmuts Fahrrad Center GmbH", "p": "12277", "c": "Berlin", "e": "hfc@hfc-bikes.de"}, {"k": "K25006", "n": "Helmuts Fahrrad Center GmbH Potsdam", "p": "12277", "c": "Berlin", "e": "hfc.potsdam@hfc-bikes.de"}, {"k": "K24918", "n": "Herkelmann-Bikes GmbH", "p": "23701", "c": "Eutin", "e": "bernd@herkelmannbikes.com"}, {"k": "K24825", "n": "Hiro Bike", "p": "51373", "c": "Leverkusen", "e": "info@hirobike-lev.de"}, {"k": "K24632", "n": "Hußmann Technik für Hof, Garten u. Zweirad", "p": "46348", "c": "Raesfeld", "e": "info@hussmann-raesfeld.de"}, {"k": "K12656", "n": "IDEEALLRAD", "p": "53913", "c": "Swisttal", "e": "info@ideeallrad.de"}, {"k": "K25418", "n": "JAGeber GmbH e-motion e-Bike Welt Merzig", "p": "66663", "c": "Merzig", "e": "j.geber@emotion-ebikes.de"}, {"k": "K07806", "n": "Jogi´s Fahrradladen", "p": "63741", "c": "Aschaffenburg", "e": "info@jogisfahrradladen.de"}, {"k": "K15906", "n": "Johanns Velowelt", "p": "55246", "c": "Mainz-Kostheim", "e": "info@johannsvelowelt.de"}, {"k": "K19226", "n": "Juizz GmbH Nürnberg", "p": "90403", "c": "Nürnberg", "e": "nuernberg@juizz.de"}, {"k": "K17516", "n": "KAD Wellness für den Drahtesel", "p": "27478", "c": "Cuxhaven", "e": "ulrichmeffert@t-online.de"}, {"k": "K08106", "n": "Karl's Bikeshop", "p": "68753", "c": "Waghäusel", "e": "wohndesign-weis@freenet.de"}, {"k": "K25335", "n": "Knut Dickten Fahrradhandel GmbH", "p": "42285", "c": "Wuppertal", "e": "info@dickten-fahrraeder.de"}, {"k": "K26804", "n": "Konstantin Blinow The Bike Business e.K.", "p": "50672", "c": "Köln", "e": "info@the-bike-business.de"}, {"k": "K25424", "n": "Lenski Vertriebs GmbH", "p": "01723", "c": "Wilsdruff", "e": "dresden-west@emotion-ebikes.de"}, {"k": "K25255", "n": "Maprue Cycling", "p": "59063", "c": "Hamm", "e": "info@maprue-cycling.de"}, {"k": "K26953", "n": "Meinhollandrad", "p": "47574", "c": "Goch", "e": "meinhollandrad@hotmail.com"}, {"k": "K21193", "n": "Meisgen und Schmitz eGbR", "p": "52525", "c": "Heinsberg", "e": "buchhaltung@mszweirad.de"}, {"k": "K25423", "n": "MK.e-Bike Welt UG e-motion e-Bike Welt Kürten", "p": "51515", "c": "Kürten", "e": "m.kolagasi@emotion-ebikes.de"}, {"k": "K24915", "n": "Moritz Willenborg & Sohn e.K", "p": "49661", "c": "Cloppenburg", "e": "zweirad@moritz-willenborg.de"}, {"k": "K24949", "n": "Moto-In Haberl GmbH", "p": "86692", "c": "Muenster", "e": "moto-in@web.de"}, {"k": "K24966", "n": "Movelo Gmbh", "p": "83435", "c": "Bad Reichenhall", "e": "m.knobloch@movelo.com"}, {"k": "K21292", "n": "NordWestRad", "p": "21762", "c": "Otterndorf", "e": "a.hoerstel@nordwestrad.de"}, {"k": "K21436", "n": "Omega Kraftrad GmbH", "p": "38108", "c": "Braunschweig", "e": "info@omega-kraftrad.de"}, {"k": "K25021", "n": "P&K Bike Company Syke GmbH", "p": "28857", "c": "Syke", "e": "bike-company-syke@web.de"}, {"k": "K25145", "n": "Pohlrad", "p": "03253", "c": "Doberlug-Kirchhain", "e": "info@pohlrad.de"}, {"k": "K04446", "n": "Pott GmbH", "p": "49196", "c": "Bad Laer", "e": "info@pott-gmbh.de"}, {"k": "K26908", "n": "Pott Trade GmbH", "p": "45136", "c": "Essen", "e": "einkauf@potttrade.de"}, {"k": "K21416", "n": "R.A.D. Grosshandel GmbH", "p": "04552", "c": "Borna Zedtlitz", "e": "rad@rad-grosshandel.de"}, {"k": "K21455", "n": "Rad & Sport GmbH", "p": "53340", "c": "Meckenheim", "e": "kundenservice@radlager24.de"}, {"k": "K24631", "n": "Rad Rech", "p": "67304", "c": "Kerzenheim", "e": "info@rad-rech.de"}, {"k": "K19156", "n": "Rad-Sportshop Odenwaldbike", "p": "64653", "c": "Lorsch", "e": "info@odenwaldbike.de"}, {"k": "K16596", "n": "Rad-Stand", "p": "90518", "c": "Altdorf", "e": "info@rad-stand.de"}, {"k": "K06396", "n": "Raddoc", "p": "14471", "c": "Potsdam", "e": "info@raddoc.bike"}, {"k": "K25054", "n": "RadEcke Rommerz", "p": "36119", "c": "Neuhof", "e": "info@radecke-rommerz.de"}, {"k": "K11136", "n": "RadGebiet", "p": "44137", "c": "Dortmund", "e": "jim@radgebiet.de"}, {"k": "K25077", "n": "Radhaus Schlitz", "p": "36110", "c": "Schlitz", "e": "radhaus-schlitz@web.de"}, {"k": "K21454", "n": "Radl Ruhland", "p": "85354", "c": "Freising", "e": "info@radl-ruhland.de"}, {"k": "K21326", "n": "Radlos", "p": "25826", "c": "Sankt Peter-Ording", "e": "radlos@gmx.net"}, {"k": "K21253", "n": "Radsport & Bikefitting Heros", "p": "45128", "c": "Essen", "e": "fahrradladen.mertes@fahrradladen-essen.com"}, {"k": "K14446", "n": "Radsport Annerose Meyer", "p": "37327", "c": "Leinefelde", "e": "annerose.meyer@gmx.de"}, {"k": "K25355", "n": "Radsport Geil", "p": "76877", "c": "Offenbach an der Queich", "e": "radsport.geil@web.de"}, {"k": "K25206", "n": "Radsport König Inh. Nele Raupach", "p": "61169", "c": "Friedberg", "e": "radsport-koenig@t-online.de"}, {"k": "K19786", "n": "Radsport Puetz", "p": "45481", "c": "Mülheim - Saarn", "e": "radsport-puetz@gmx.de"}, {"k": "K20769", "n": "Radstation Schmoeckwitz", "p": "12527", "c": "Berlin", "e": "info@radstation-schmoeckwitz.de"}, {"k": "K26824", "n": "Radwerk Grünberg", "p": "35305", "c": "Grünberg", "e": "shop@radwerk-gruenberg.de"}, {"k": "K26742", "n": "Rebike Mobility GmbH", "p": "81379", "c": "München", "e": "einkauf@rebike.de"}, {"k": "K14796", "n": "Schaltwerk Der Radladen", "p": "56812", "c": "Cochem", "e": "info@schaltwerk-bikes.de"}, {"k": "K25201", "n": "Schelp & Fischer OHG", "p": "34346", "c": "Hann. Münden", "e": "h.fischer@schelp.de"}, {"k": "K18756", "n": "Schlageter", "p": "79639", "c": "Grenzach-Wyhlen", "e": "info@velo-shop.de"}, {"k": "K21083", "n": "Schweizer Fahrräder & Bikes", "p": "79206", "c": "Breisach", "e": "info@schweizer-breisach.de"}, {"k": "K24914", "n": "Scooter & Bikes", "p": "49624", "c": "Löningen", "e": "scooter.bike@kabelmail.de"}, {"k": "K21379", "n": "Servicepartner Pößneck (Bike-Mike)", "p": "81379", "c": "München", "e": "ab@company-bike.com"}, {"k": "K10446", "n": "Spandauer Fahrradhaus", "p": "13581", "c": "Berlin", "e": "info@spandauerfahrradhaus.de"}, {"k": "K24620", "n": "Staggenborg Clever Mobil", "p": "49757", "c": "Werlte", "e": "frank@staggenborg-mobil.de"}, {"k": "K25871", "n": "Stalf Kfz & Rad", "p": "79117", "c": "Freiburg im Breisgau", "e": "rad@stalf.net"}, {"k": "K24637", "n": "Team Vahrenkamp GmbH", "p": "49324", "c": "Melle", "e": "info@teamvahrenkamp.de"}, {"k": "K25260", "n": "team. Outdoorbike GmbH", "p": "52372", "c": "Kreuzau", "e": "info@outdoorbike.eu"}, {"k": "K17966", "n": "Tim´s Fahrradshop", "p": "49740", "c": "Haselünne", "e": "timsfahrradshop@web.de"}, {"k": "K25742", "n": "Ullus eBikes UG", "p": "35440", "c": "Linden", "e": "ullus@ullus-ebikes.de"}, {"k": "K26951", "n": "van Herk Bikes GmbH", "p": "41334", "c": "Nettetal", "e": "info@vanherk-bikes.de"}, {"k": "K10666", "n": "Vehiculo Fahrradcenter", "p": "21255", "c": "Tostedt", "e": "vehiculofahrrad@aol.com"}, {"k": "K25397", "n": "veloCenter OHG", "p": "24116", "c": "Kiel", "e": "info@velocenter.de"}, {"k": "K16876", "n": "Velodrama", "p": "81379", "c": "München", "e": "info@velodrama.de"}, {"k": "K16856", "n": "Velologe GmbH", "p": "72202", "c": "Nagold", "e": "info@velologe.de"}, {"k": "K21227", "n": "Vento Zweiräder & Service", "p": "27374", "c": "Visselhövede", "e": "info@vento-zweirad.de"}, {"k": "K14626", "n": "VITBIKES / Energy Bike Systems GmbH", "p": "91757", "c": "Treuchtlingen", "e": "treuchtlingen@vitbikes.de"}, {"k": "K26878", "n": "We like Bikes Münster GmbH", "p": "48159", "c": "Münster", "e": "muenster@welikebikes.de"}, {"k": "K11406", "n": "Wiegetritt Cycle Components", "p": "28865", "c": "Lilienthal", "e": "wiegetritt@web.de"}, {"k": "K25535", "n": "Wilhelm Daume GmbH", "p": "51467", "c": "Bergisch Gladbach", "e": "fahrraeder@daume.com"}, {"k": "K20774", "n": "WingWheels", "p": "10119", "c": "Berlin", "e": "h.kunath@wingwheels.de"}, {"k": "K21442", "n": "Yellow E-Bike Store Inh. Marcus Korte", "p": "39418", "c": "Staßfurt", "e": "marcus-korte@gmx.de"}, {"k": "K15276", "n": "Zweirad Berginski", "p": "48268", "c": "Greven", "e": "zweirad-berginski@t-online.de"}, {"k": "K21393", "n": "Zweirad Bernhard Mennemeier", "p": "45731", "c": "Waltrop", "e": "bernhardmennemeier@live.de"}, {"k": "K07446", "n": "Zweirad Brune", "p": "32139", "c": "SPENGE", "e": "zweirad-brune@alice.de"}, {"k": "K07266", "n": "Zweirad Büllesbach", "p": "46562", "c": "VOERDE", "e": "info@zweirad-buellesbach.de"}, {"k": "K24671", "n": "Zweirad Cyran GmbH", "p": "48565", "c": "Steinfurt", "e": "zweiradcyran@hotmail.com"}, {"k": "K24851", "n": "Zweirad Deppen GmbH", "p": "48429", "c": "Rheine", "e": "info@zweirad-deppen.de"}, {"k": "K25868", "n": "Zweirad Hanselle GmbH", "p": "48465", "c": "Schüttorf", "e": "info@zweirad-hanselle.de"}, {"k": "K11126", "n": "Zweirad Kleefisch", "p": "40764", "c": "Langenfeld", "e": "info@zweirad-kleefisch.de"}, {"k": "K24841", "n": "Zweirad Kopsch", "p": "04552", "c": "Borna", "e": "zweirad.kopsch@web.de"}, {"k": "K07406", "n": "Zweirad Kröger - Inh. Fabian Inhestern", "p": "49424", "c": "Goldenstedt", "e": "info@zweirad-kroeger.de"}, {"k": "K12066", "n": "Zweirad Kämpchen", "p": "33442", "c": "Herzebrock-Clarholz", "e": "info@das2rad.de"}, {"k": "K26400", "n": "Zweirad Meyer", "p": "26871", "c": "Papenburg", "e": "zweiradmeyer-papenburg@outlook.de"}, {"k": "K18426", "n": "Zweirad Nübling", "p": "79211", "c": "Denzlingen", "e": "zweirad-nuebling@t-online.de"}, {"k": "K24627", "n": "Zweirad Oeltermann", "p": "26384", "c": "Wilhelmshaven", "e": "guenter.oeltermann@t-online.de"}, {"k": "K21085", "n": "Zweirad Resewski Gmbh", "p": "01237", "c": "Dresden", "e": "bikestore@resewski.de"}, {"k": "K21073", "n": "Zweirad Ross e.K", "p": "48336", "c": "Sassenberg", "e": "u.ross@zweirad-ross.de"}, {"k": "K15406", "n": "Zweirad Scheipers", "p": "48607", "c": "Ochtrup", "e": "mail@zweirad-scheipers.de"}, {"k": "K26816", "n": "Zweirad Schleussinger Günter Schleussinger", "p": "91788", "c": "Pappenheim", "e": "zweirad@schleussinger.de"}, {"k": "K21183", "n": "Zweirad Stamm GmbH & Co. KG", "p": "59229", "c": "Ahlen", "e": "info@zweirad-stamm.com"}, {"k": "K07826", "n": "Zweirad Steuernagel", "p": "63674", "c": "Altenstadt", "e": "info@zweirad-steuernagel.de"}, {"k": "K25253", "n": "Zweirad Stille GbR", "p": "30900", "c": "Wedemark", "e": "kontakt@zweirad-stille.de"}, {"k": "K12116", "n": "Zweirad Strätker GmbH & Co KG", "p": "48249", "c": "Dülmen", "e": "info@zweiradstraetker.de"}, {"k": "K14806", "n": "Zweirad Tilly", "p": "18586", "c": "Ostseebad Göhren", "e": "info@fahrrad-tilly.de"}, {"k": "K25240", "n": "Zweirad Zeissler", "p": "63599", "c": "Biebergemünd - Kassel", "e": "info@zeissler.de"}, {"k": "K25262", "n": "Zweirad-Center Herbach", "p": "99837", "c": "Berka", "e": "info@zweirad-herbach.de"}, {"k": "K10926", "n": "Zweirad-Fachgeschaeft Stroje", "p": "26340", "c": "Zetel", "e": "mail@stroje.bike"}, {"k": "K21443", "n": "Zweirad-Schellhase", "p": "66773", "c": "Schwalbach", "e": "info@zweirad-schellhase.de"}, {"k": "K25869", "n": "Zweirad-Wichmann", "p": "38440", "c": "Wolfsburg", "e": "mail@zweirad-wichmann.de"}, {"k": "K26969", "n": "Zweiradcenter Heuermann", "p": "27239", "c": "Twistringen", "e": "info@zweiradcenter-heuermann.de"}, {"k": "K11846", "n": "Zweiradcenter Heuermann (OLD) *DidNotUse*", "p": "27239", "c": "Twistringen", "e": "info@zweiradcenter-heuermann.de"}, {"k": "K25506", "n": "Zweiradcenter Jansen", "p": "25899", "c": "Niebüll", "e": "info@zweiradcenter-jansen.de"}, {"k": "K13236", "n": "Zweiradcenter Lehmann", "p": "15907", "c": "Lübben (Spreewald)", "e": "info@lehmann-bike.de"}, {"k": "K24947", "n": "Zweiradhandel Dieter Grotheer", "p": "27432", "c": "Basdahl", "e": "dieter.grotheer@gmx.de"}, {"k": "K12746", "n": "Zweiradhaus Mielke GmbH", "p": "06268", "c": "Querfurt", "e": "webmaster@zweiradhaus-mielke.de"}, {"k": "K26504", "n": "Zweiradladen Borkum", "p": "26757", "c": "Borkum", "e": "zweiradladen-borkum@t-online.de"}];
+
+  (function buildDealerSelect() {
+    var sel = $('c_dealerSel');
+    var o0 = document.createElement('option');
+    o0.value = '-1'; o0.textContent = 'Neuer Händler (manuell anlegen)';
+    sel.appendChild(o0);
+    DEALERS.forEach(function (d, i) {
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = d.n + ' — ' + d.k + (d.c ? ' (' + d.c + ')' : '');
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function () {
+      var i = parseInt(this.value, 10);
+      if (i >= 0 && DEALERS[i]) {
+        var d = DEALERS[i];
+        $('c_kdnr').value = d.k;
+        $('c_haendler').value = d.n;
+        $('c_email').value = d.e;
+        $('c_stadt').value = (d.p ? d.p + ' ' : '') + d.c;
+      } else {
+        $('c_kdnr').value = ''; $('c_haendler').value = ''; $('c_email').value = ''; $('c_stadt').value = '';
+      }
+      renderContract();
+    });
+  })();
+
+  // ---------- Vertragsjahr ----------
+  function cYear() {
+    var j = Math.round(num('c_jahr'));
+    return (j >= 2026 && j <= 2040) ? j : 2027;
+  }
+  function updateYearLabels() {
+    var J = cYear();
+    $('lbl_k_vor').textContent = 'Planung: Bis 31.12.' + (J - 1) + ' mind. 30 % des Umsatzziels als Vorbestellung bis 01.09.' + J;
+    $('lbl_k_aus').textContent = 'Planung: Bis 01.07.' + J + ' mind. 40 % des Umsatzziels ausgeliefert';
+    $('lbl_brekr').textContent = 'Mind. 5 Brekr-Räder in ' + J + ' geliefert';
+  }
+  $('c_jahr').addEventListener('input', updateYearLabels);
+
+  // ---------- Impressum/Datenschutz als PDF ----------
+  $('legalPdfBtn').addEventListener('click', function () {
+    var J = new Date().getFullYear();
+    var p = docHeadHtml('Impressum & Datenschutz') +
+      $('legalImpressum').innerHTML +
+      $('legalDatenschutz').innerHTML +
+      '<div class="foot"><span>QWIC · Impressum & Datenschutzerklärung</span><span>Stand ' + J + '</span></div>';
+    $('legalPrintArea').innerHTML = '<div class="sheet">' + p + '</div>';
+    document.body.setAttribute('data-print', 'legal');
+    window.print();
+  });
+
+  var contractInputs = ['c_jahr','c_kdnr','c_haendler','c_email','c_stadt','c_gf','c_ziel','c_freiMarge','c_staffelSel',
     'k_pos','k_pos_p','k_vor','k_vor_p','k_aus','k_aus_p','k_sepa','k_sepa_p',
     'b_brekr','b_brekr_p',
     'd_demo','d_brekr','c_datum','c_ort','c_signH','c_signV','c_notes','c_legal',
@@ -1001,10 +1156,11 @@
   }
 
   function footHtml(page, total) {
-    return '<div class="foot"><span>QWIC · Partnervereinbarung 2027</span><span>Seite ' + page + ' / ' + total + '</span></div>';
+    return '<div class="foot"><span>QWIC · Partnervereinbarung ' + cYear() + '</span><span>Seite ' + page + ' / ' + total + '</span></div>';
   }
 
   function renderContract() {
+    var J = cYear();
     var host = $('printArea');
     var htyp = checked('ht_xl') ? 'xl' : (checked('ht_sp') ? 'sp' : 'std');
     var freiMode = checked('mm_frei');
@@ -1022,7 +1178,7 @@
 
 
     // ================= Seite 1 =================
-    var p1 = docHeadHtml();
+    var p1 = docHeadHtml('Partnervereinbarung ' + J);
 
     p1 += '<h4 class="sec">Kundendaten</h4><div class="kd-grid">' +
       boxHtml('Kundennummer', val('c_kdnr')) + boxHtml('Händlername', val('c_haendler')) + boxHtml('E-Mail', val('c_email')) +
@@ -1036,7 +1192,7 @@
 
     if (freiMode) {
       p1 += '<h4 class="sec">Marge</h4>' +
-        '<div class="pct-line"><span>Vereinbarte Händlermarge auf die unverbindlichen Verkaufspreise (exkl. MwSt.), unabhängig von Umsatzstaffeln, gültig für die gesamte Vertragslaufzeit 2027.</span>' +
+        '<div class="pct-line"><span>Vereinbarte Händlermarge auf die unverbindlichen Verkaufspreise (exkl. MwSt.), unabhängig von Umsatzstaffeln, gültig für die gesamte Vertragslaufzeit ' + J + '.</span>' +
         '<span class="p">' + pct.format(num('c_freiMarge')) + ' %</span></div>';
     } else {
       p1 += '<h4 class="sec">Margenstaffel</h4><table class="ct"><thead><tr><th style="text-align:left;">Staffel</th><th>Umsatz €</th><th>Marge %</th></tr></thead><tbody>';
@@ -1051,8 +1207,8 @@
 
     var kpiLines = [];
     if (checked('k_pos')) kpiLines.push({ t: 'Markenpräsenz: Bei der Erstbestellung müssen mindestens 4 Fahrräder inklusive POS-Material abgenommen werden.', p: num('k_pos_p') });
-    if (checked('k_vor')) kpiLines.push({ t: 'Planung: Bis zum 31.12.2026: mind. 30 % des Umsatzziels als Vorbestellung bis zum 01.09.2027.', p: num('k_vor_p') });
-    if (checked('k_aus')) kpiLines.push({ t: 'Planung: Bis zum 01.07.2027: mind. 40 % des Umsatzziels ausgeliefert.', p: num('k_aus_p') });
+    if (checked('k_vor')) kpiLines.push({ t: 'Planung: Bis zum 31.12.' + (J - 1) + ': mind. 30 % des Umsatzziels als Vorbestellung bis zum 01.09.' + J + '.', p: num('k_vor_p') });
+    if (checked('k_aus')) kpiLines.push({ t: 'Planung: Bis zum 01.07.' + J + ': mind. 40 % des Umsatzziels ausgeliefert.', p: num('k_aus_p') });
     if (kpiLines.length) {
       p1 += '<h4 class="sec">KPI</h4>';
       kpiLines.forEach(function (l) {
@@ -1072,16 +1228,16 @@
     p1 += footHtml(1, totalPages);
 
     // ================= Seite 2 =================
-    var p2 = docHeadHtml();
+    var p2 = docHeadHtml('Partnervereinbarung ' + J);
     var boni = [];
-    if (checked('b_brekr')) boni.push({ h: 'Brekr Bonus', t: 'Wenn im Jahr 2027 mindestens 5 Brekr Fahrräder geliefert wurden, wird ein Bonus von ' + pct.format(num('b_brekr_p')) + ' % gewährt.', p: pct.format(num('b_brekr_p')) + ' %' });
+    if (checked('b_brekr')) boni.push({ h: 'Brekr Bonus', t: 'Wenn im Jahr ' + J + ' mindestens 5 Brekr Fahrräder geliefert wurden, wird ein Bonus von ' + pct.format(num('b_brekr_p')) + ' % gewährt.', p: pct.format(num('b_brekr_p')) + ' %' });
 
     if (boni.length) {
       p2 += '<h4 class="sec">Bonus</h4>';
       boni.forEach(function (b) {
         p2 += '<div class="pct-line"><span><strong>' + b.h + '</strong><br>' + b.t + '</span><span class="p">' + b.p + '</span></div>';
       });
-      p2 += '<p class="note-sm">Der Bonus wird im 1. Quartal 2028 mittels Gutschrift ausgezahlt. Der Prozentsatz wird auf den netto fakturierten QWIC-Umsatz berechnet. Bei unzureichendem Zahlungsverhalten behält sich QWIC das Recht vor, die Auszahlung des Leistungsbonus zu verweigern.</p>';
+      p2 += '<p class="note-sm">Der Bonus wird im 1. Quartal ' + (J + 1) + ' mittels Gutschrift ausgezahlt. Der Prozentsatz wird auf den netto fakturierten QWIC-Umsatz berechnet. Bei unzureichendem Zahlungsverhalten behält sich QWIC das Recht vor, die Auszahlung des Leistungsbonus zu verweigern.</p>';
     }
 
     if (checked('d_demo') || checked('d_brekr')) {
@@ -1113,10 +1269,10 @@
     // ================= Seite 3 (Rechtstext) =================
     var p3 = '';
     if (withLegal) {
-      p3 = docHeadHtml() + '<h4 class="sec">Partnervereinbarung QWIC DE 2027 – Vertragsbedingungen</h4><div class="legal">' +
+      p3 = docHeadHtml('Partnervereinbarung ' + J) + '<h4 class="sec">Partnervereinbarung QWIC DE ' + J + ' – Vertragsbedingungen</h4><div class="legal">' +
       '<p>Diese Partnervereinbarung ist Bestandteil des vorliegenden Vertrags. Zusätzlich gelten die Allgemeinen Geschäftsbedingungen von QWIC für diesen Vertrag und werden als integraler Bestandteil betrachtet („Allgemeine Geschäftsbedingungen der QWIC BV“). Die aktuellen Allgemeinen Geschäftsbedingungen sind im Händlerportal von QWIC veröffentlicht und können auf Anfrage vom Vertreter von QWIC bereitgestellt werden. Soweit diese Partnervereinbarung von den Allgemeinen Geschäftsbedingungen abweichen oder im Widerspruch dazu stehen, hat die Partnervereinbarung Vorrang. Mit der Unterzeichnung dieses Vertrags erklären Sie, dass Sie die Partnervereinbarung sowie die Allgemeinen Geschäftsbedingungen von QWIC zur Kenntnis genommen haben und diese akzeptieren.</p>' +
       '<h5>1. Allgemeines</h5>' +
-      '<p>1.1 Die auf dem Deckblatt angegebenen finanziellen Vereinbarungen gelten grundsätzlich für die gesamte Vertragslaufzeit (Januar – Dezember 2027). QWIC behält sich das Recht vor, die finanziellen Vereinbarungen während der Laufzeit anzupassen, falls nach ihrem Ermessen die Umsatzziele für das laufende Jahr nicht erreicht werden.</p>' +
+      '<p>1.1 Die auf dem Deckblatt angegebenen finanziellen Vereinbarungen gelten grundsätzlich für die gesamte Vertragslaufzeit (Januar – Dezember ' + J + '). QWIC behält sich das Recht vor, die finanziellen Vereinbarungen während der Laufzeit anzupassen, falls nach ihrem Ermessen die Umsatzziele für das laufende Jahr nicht erreicht werden.</p>' +
       '<p>1.2 Die Händlervereinbarung gilt ausschließlich für die bei QWIC registrierte Adresse des Ladengeschäfts/Showrooms oder Abholpunkts. Falls sich die Adresse ändert oder eine neue Adresse hinzukommt, muss eine separate Händlervereinbarung abgeschlossen werden.</p>' +
       '<p>1.3 Alle Preise sind empfohlene Verkaufspreise für Endverbraucher inkl. MwSt., sofern nicht anders angegeben.</p>' +
       '<p>1.4 Nach Beendigung dieses Vertrags – aus welchem Grund auch immer – ist der Händler verpflichtet, jegliche Vermarktung und den Verkauf der Produkte sofort einzustellen, sofern er sich dabei als (autorisierter) Händler und/oder bevorzugter Lieferant von QWIC präsentiert oder dies suggeriert.</p>' +
@@ -1220,10 +1376,22 @@
   makeSigPad('sigH', 'sigHClear', 'H');
   makeSigPad('sigV', 'sigVClear', 'V');
 
+  // ---------- Impressum / Datenschutz ----------
+  function openLegal(target) {
+    $('legalOverlay').classList.add('open');
+    var el = $(target);
+    if (el) setTimeout(function () { el.scrollIntoView({ block: 'start' }); }, 30);
+  }
+  $('openImpressum').addEventListener('click', function () { openLegal('legalImpressum'); });
+  $('openDatenschutz').addEventListener('click', function () { openLegal('legalDatenschutz'); });
+  $('legalClose').addEventListener('click', function () { $('legalOverlay').classList.remove('open'); });
+  $('legalOverlay').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('open'); });
+
   // ---------- Init ----------
   var today = new Date();
   $('c_datum').value = today.toISOString().slice(0, 10);
   $('s_datum').value = today.toISOString().slice(0, 10);
+  updateYearLabels();
   renderSepa();
   renderSelect();
   calc();
