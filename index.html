@@ -10,6 +10,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 <style>
   /* ============================================================
      MACAN einbinden: Fontdateien neben diese HTML-Datei legen
@@ -239,7 +240,8 @@
   .dd-item small { color: var(--muted); display: block; font-size: 12px; }
   .dd-empty { padding: 9px 12px; color: var(--muted); font-size: 13px; }
 
-  #legalPrintArea { display: none; }
+  #legalPrintArea { position: absolute; left: -99999px; top: 0; width: 210mm; }
+  body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
   #legalPrintArea .sheet h2 { background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase; padding: 5px 10px; margin: 6mm 0 3mm; border-left: 4px solid #f47920; }
   #legalPrintArea .sheet h3 { font-size: 10pt; margin: 3mm 0 1mm; color: #000; }
   #legalPrintArea .sheet p { font-size: 9pt; color: #222; margin-bottom: 2mm; }
@@ -256,7 +258,8 @@
   .dd-item small { color: var(--muted); display: block; font-size: 12px; }
   .dd-empty { padding: 9px 12px; color: var(--muted); font-size: 13px; }
 
-  #legalPrintArea { display: none; }
+  #legalPrintArea { position: absolute; left: -99999px; top: 0; width: 210mm; }
+  body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
   #legalPrintArea .sheet h2 { background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase; padding: 5px 10px; margin: 6mm 0 3mm; border-left: 4px solid #f47920; }
   #legalPrintArea .sheet h3 { font-size: 10pt; margin: 3mm 0 1mm; color: #000; }
   #legalPrintArea .sheet p { font-size: 9pt; color: #222; margin-bottom: 2mm; }
@@ -280,7 +283,7 @@
     #brekrPrintArea { zoom: 1 !important; margin: 0; }
     body[data-print="sepa"] #tab-sepa { display: block !important; }
     body[data-print="legal"] #tab-contract, body[data-print="legal"] #tab-sepa { display: none !important; }
-    body[data-print="legal"] #legalPrintArea { display: block !important; }
+    body[data-print="legal"] #legalPrintArea { display: block !important; position: static !important; left: 0 !important; }
     #tab-calc, #tab-workbook { display: none !important; }
     #sepaPrintArea { zoom: 1 !important; margin: 0; }
     main { max-width: none; padding: 0; }
@@ -401,7 +404,7 @@
 
       <div class="contract-actions">
         <button class="btn" id="pdfBtn">PDF erstellen</button>
-        <span class="hint" style="margin:0;">Öffnet den Druckdialog → dort „Als PDF sichern“. Nicht angehakte Optionen erscheinen nicht im PDF. iPad: falls kein Dialog erscheint, Seite in Safari öffnen → Teilen → Drucken.</span>
+        <span class="hint" style="margin:0;">Erstellt die PDF direkt als Download (iPad: „In Dateien sichern“). Nicht angehakte Optionen erscheinen nicht im PDF.</span>
       </div>
     </div>
 
@@ -467,7 +470,7 @@
 
       <div class="contract-actions">
         <button class="btn" id="sepaPdfBtn">PDF erstellen</button>
-        <span class="hint" style="margin:0;">Öffnet den Druckdialog → „Als PDF sichern“.</span>
+        <span class="hint" style="margin:0;">Erstellt die PDF direkt als Download (iPad: „In Dateien sichern“).</span>
       </div>
     </div>
 
@@ -560,7 +563,7 @@
 
       <div class="contract-actions">
         <button class="btn" id="brekrPdfBtn">PDF erstellen</button>
-        <span class="hint" style="margin:0;">Öffnet den Druckdialog → „Als PDF sichern“. Nicht angehakte Optionen erscheinen nicht im PDF.</span>
+        <span class="hint" style="margin:0;">Erstellt die PDF direkt als Download (iPad: „In Dateien sichern“). Nicht angehakte Optionen erscheinen nicht im PDF.</span>
       </div>
     </div>
 
@@ -1279,8 +1282,7 @@
       $('legalDatenschutz').innerHTML +
       '<div class="foot"><span>QWIC · Impressum & Datenschutzerklärung</span><span>Stand ' + J + '</span></div>';
     $('legalPrintArea').innerHTML = '<div class="sheet">' + p + '</div>';
-    document.body.setAttribute('data-print', 'legal');
-    window.print();
+    makePdf($('legalPrintArea'), 'QWIC_Impressum_Datenschutz.pdf', 'legal');
   });
 
   var contractInputs = ['c_jahr','c_kdnr','c_haendler','c_email','c_stadt','c_gf','c_ziel','c_freiMarge','c_staffelSel',
@@ -1476,6 +1478,43 @@
     fitPreview();
   }
 
+  // ================= PDF-Export (randlos A4, ohne Browser-Kopfzeilen) =================
+  function slug(s) {
+    return String(s || '').trim().replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+  }
+  function makePdf(host, filename, fallbackAttr) {
+    if (typeof html2pdf === 'undefined') {
+      // Bibliothek (noch) nicht geladen -> Druckdialog als Fallback
+      if (fallbackAttr) document.body.setAttribute('data-print', fallbackAttr);
+      else document.body.removeAttribute('data-print');
+      window.print();
+      return;
+    }
+    var prevZoom = host.style.zoom;
+    host.style.zoom = 1;
+    document.body.classList.add('pdf-export-active');
+    var opt = {
+      margin: 0,
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], after: '.sheet:not(:last-child)' }
+    };
+    function done() {
+      host.style.zoom = prevZoom;
+      document.body.classList.remove('pdf-export-active');
+    }
+    html2pdf().set(opt).from(host).save().then(done).catch(function (err) {
+      done();
+      // Notfall: Druckdialog
+      if (fallbackAttr) document.body.setAttribute('data-print', fallbackAttr);
+      else document.body.removeAttribute('data-print');
+      window.print();
+    });
+  }
+
   // ================= SEPA-Mandat =================
   function renderSepa() {
     var host = $('sepaPrintArea');
@@ -1533,9 +1572,8 @@
   $('s_maxB').addEventListener('change', renderSepa);
 
   $('sepaPdfBtn').addEventListener('click', function () {
-    document.body.setAttribute('data-print', 'sepa');
     renderSepa();
-    window.print();
+    makePdf($('sepaPrintArea'), 'QWIC_SEPA-Mandat' + (val('s_hname') ? '_' + slug(val('s_hname')) : '') + '.pdf', 'sepa');
   });
 
   // ================= BREKR Vertrag =================
@@ -1790,15 +1828,13 @@
     $('lbl_bkqwic').textContent = 'Abnahme von 5 BREKR-Modellen in ' + J + ' — auf QWIC-Nettoumsatz (nur für QWIC-Händler)';
   });
   $('brekrPdfBtn').addEventListener('click', function () {
-    document.body.setAttribute('data-print', 'brekr');
     renderBrekr();
-    window.print();
+    makePdf($('brekrPrintArea'), 'BREKR_Haendlerkonditionen_' + bkYear() + (val('bk_firma') ? '_' + slug(val('bk_firma')) : '') + '.pdf', 'brekr');
   });
 
   $('pdfBtn').addEventListener('click', function () {
-    document.body.removeAttribute('data-print');
     renderContract();
-    window.print();
+    makePdf($('printArea'), 'QWIC_Partnervereinbarung_' + cYear() + (val('c_haendler') ? '_' + slug(val('c_haendler')) : '') + '.pdf', null);
   });
 
   makeSigPad('sigH', 'sigHClear', 'H');
