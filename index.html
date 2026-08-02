@@ -739,7 +739,7 @@
 </main>
 
 <footer class="no-print">
-  QWIC Händler-Tools · <span style="color:var(--orange); font-weight:700;">v18</span> ·
+  QWIC Händler-Tools · <span style="color:var(--orange); font-weight:700;">v19</span> ·
   <button class="flink" id="openImpressum">Impressum</button> ·
   <button class="flink" id="openDatenschutz">Datenschutz</button>
 </footer>
@@ -1544,11 +1544,17 @@
       stage.innerHTML = '';
       window.scrollTo(prevX, prevY);
     }
-    var worker = html2pdf().set(opt).from(sheets[0]).toPdf();
+    function pageCount(pdf) { return pdf.getNumberOfPages ? pdf.getNumberOfPages() : pdf.internal.getNumberOfPages(); }
+    function trim(pdf, expected) {
+      var n = pageCount(pdf);
+      while (n > expected) { pdf.deletePage(n); n--; }
+    }
+    var worker = html2pdf().set(opt).from(sheets[0]).toPdf().get('pdf').then(function (pdf) { trim(pdf, 1); });
     for (var j = 1; j < sheets.length; j++) {
-      (function (s) {
-        worker = worker.get('pdf').then(function (pdf) { pdf.addPage(); }).from(s).toContainer().toCanvas().toPdf();
-      })(sheets[j]);
+      (function (s, expected) {
+        worker = worker.get('pdf').then(function (pdf) { pdf.addPage(); }).from(s).toContainer().toCanvas().toPdf()
+          .get('pdf').then(function (pdf) { trim(pdf, expected); });
+      })(sheets[j], j + 1);
     }
     worker.save(filename).then(done).catch(function () {
       done();
