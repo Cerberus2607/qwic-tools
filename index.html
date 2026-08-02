@@ -242,6 +242,17 @@
 
   #legalPrintArea { position: absolute; left: -99999px; top: 0; width: 210mm; }
   body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
+  /* Kompaktes Ein-Seiten-Layout (SEPA-Mandat) */
+  .sheet.sheet-compact { font-size: 9.5pt; line-height: 1.35; }
+  .sheet.sheet-compact .doc-head { margin-bottom: 4mm; }
+  .sheet.sheet-compact h4.sec { margin: 4mm 0 2.5mm; padding: 4px 9px; font-size: 9pt; }
+  .sheet.sheet-compact .box { min-height: 28px; padding: 4px 8px; }
+  .sheet.sheet-compact .kd-grid { gap: 2.5mm; }
+  .sheet.sheet-compact p { margin-bottom: 1.5mm; }
+  .sheet.sheet-compact .note-sm { margin-top: 1mm; }
+  .sheet.sheet-compact .pct-line { padding: 2mm 1mm; }
+  .sheet.sheet-compact .sig-grid { margin-top: 4mm; gap: 6mm; }
+
   #pdfStage { position: absolute; top: 0; left: 0; width: 210mm; z-index: -1; background: #ffffff; pointer-events: none; }
   #pdfStage .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
   @media print { #pdfStage { display: none !important; } }
@@ -263,6 +274,17 @@
 
   #legalPrintArea { position: absolute; left: -99999px; top: 0; width: 210mm; }
   body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
+  /* Kompaktes Ein-Seiten-Layout (SEPA-Mandat) */
+  .sheet.sheet-compact { font-size: 9.5pt; line-height: 1.35; }
+  .sheet.sheet-compact .doc-head { margin-bottom: 4mm; }
+  .sheet.sheet-compact h4.sec { margin: 4mm 0 2.5mm; padding: 4px 9px; font-size: 9pt; }
+  .sheet.sheet-compact .box { min-height: 28px; padding: 4px 8px; }
+  .sheet.sheet-compact .kd-grid { gap: 2.5mm; }
+  .sheet.sheet-compact p { margin-bottom: 1.5mm; }
+  .sheet.sheet-compact .note-sm { margin-top: 1mm; }
+  .sheet.sheet-compact .pct-line { padding: 2mm 1mm; }
+  .sheet.sheet-compact .sig-grid { margin-top: 4mm; gap: 6mm; }
+
   #pdfStage { position: absolute; top: 0; left: 0; width: 210mm; z-index: -1; background: #ffffff; pointer-events: none; }
   #pdfStage .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
   @media print { #pdfStage { display: none !important; } }
@@ -717,7 +739,7 @@
 </main>
 
 <footer class="no-print">
-  QWIC Händler-Tools · <span style="color:var(--orange); font-weight:700;">v17</span> ·
+  QWIC Händler-Tools · <span style="color:var(--orange); font-weight:700;">v18</span> ·
   <button class="flink" id="openImpressum">Impressum</button> ·
   <button class="flink" id="openDatenschutz">Datenschutz</button>
 </footer>
@@ -1544,10 +1566,10 @@
       ? 'Unbegrenzt'
       : ('Begrenzt auf ' + (val('s_betrag') ? euro.format(num('s_betrag')) : '________ €') + ' pro Lastschrift');
     var datum = val('s_datum') ? new Date(val('s_datum') + 'T00:00:00').toLocaleDateString('de-DE') : '';
-    var sig = sigData.S ? '<img src="' + sigData.S + '" alt="" style="height:16mm; max-width:100%; display:block;">' : '<div style="height:16mm;"></div>';
+    var sig = sigData.S ? '<img src="' + sigData.S + '" alt="" style="height:12mm; max-width:100%; display:block;">' : '<div style="height:12mm;"></div>';
 
     var p = docHeadHtml('SEPA-Firmenlastschrift');
-    p += '<p style="font-size:9pt; color:#555; margin:-4mm 0 4mm;">Fortlaufende Einzugsermächtigung für Firmenkunden (SEPA-Firmenlastschrift)</p>';
+    p += '<p style="font-size:8.5pt; color:#555; margin:-2mm 0 2mm;">Fortlaufende Einzugsermächtigung für Firmenkunden (SEPA-Firmenlastschrift)</p>';
 
     p += '<h4 class="sec">Zahlungsempfänger</h4><div class="kd-grid" style="grid-template-columns:1fr 1fr;">' +
       boxHtml('Name', val('s_name')) + boxHtml('Gläubiger-ID', val('s_glid')) +
@@ -1579,7 +1601,7 @@
       '</div>';
 
     p += '<div class="foot"><span>QWIC · SEPA-Firmenlastschrift</span><span>Seite 1 / 1</span></div>';
-    host.innerHTML = '<div class="sheet">' + p + '</div>';
+    host.innerHTML = '<div class="sheet sheet-compact">' + p + '</div>';
 
     var cw = host.parentElement.clientWidth;
     host.style.zoom = Math.min(1, cw / 800);
