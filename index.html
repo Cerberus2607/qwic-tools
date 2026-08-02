@@ -1492,17 +1492,20 @@
     var sheets = host.querySelectorAll('.sheet');
     if (!sheets.length) return;
     var prevZoom = host.style.zoom;
+    var prevX = window.scrollX, prevY = window.scrollY;
+    window.scrollTo(0, 0);
     host.style.zoom = 1;
     document.body.classList.add('pdf-export-active');
     var opt = {
       margin: 0,
       image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     function done() {
       host.style.zoom = prevZoom;
       document.body.classList.remove('pdf-export-active');
+      window.scrollTo(prevX, prevY);
     }
     var worker = html2pdf().set(opt).from(sheets[0]).toPdf();
     for (var i = 1; i < sheets.length; i++) {
