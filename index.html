@@ -241,7 +241,7 @@
   .dd-empty { padding: 9px 12px; color: var(--muted); font-size: 13px; }
 
   #legalPrintArea { position: absolute; left: -99999px; top: 0; width: 210mm; }
-  body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+  body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
   #legalPrintArea .sheet h2 { background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase; padding: 5px 10px; margin: 6mm 0 3mm; border-left: 4px solid #f47920; }
   #legalPrintArea .sheet h3 { font-size: 10pt; margin: 3mm 0 1mm; color: #000; }
   #legalPrintArea .sheet p { font-size: 9pt; color: #222; margin-bottom: 2mm; }
@@ -259,7 +259,7 @@
   .dd-empty { padding: 9px 12px; color: var(--muted); font-size: 13px; }
 
   #legalPrintArea { position: absolute; left: -99999px; top: 0; width: 210mm; }
-  body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+  body.pdf-export-active .sheet { margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; height: 296mm !important; min-height: 0 !important; overflow: hidden !important; }
   #legalPrintArea .sheet h2 { background: #000; color: #fff; font-size: 9.5pt; letter-spacing: 2.5px; text-transform: uppercase; padding: 5px 10px; margin: 6mm 0 3mm; border-left: 4px solid #f47920; }
   #legalPrintArea .sheet h3 { font-size: 10pt; margin: 3mm 0 1mm; color: #000; }
   #legalPrintArea .sheet p { font-size: 9pt; color: #222; margin-bottom: 2mm; }
@@ -1282,7 +1282,7 @@
       $('legalDatenschutz').innerHTML +
       '<div class="foot"><span>QWIC · Impressum & Datenschutzerklärung</span><span>Stand ' + J + '</span></div>';
     $('legalPrintArea').innerHTML = '<div class="sheet">' + p + '</div>';
-    makePdf($('legalPrintArea'), 'QWIC_Impressum_Datenschutz.pdf', 'legal');
+    makePdf($('legalPrintArea'), 'QWIC Impressum und Datenschutz.pdf', 'legal');
   });
 
   var contractInputs = ['c_jahr','c_kdnr','c_haendler','c_email','c_stadt','c_gf','c_ziel','c_freiMarge','c_staffelSel',
@@ -1479,36 +1479,39 @@
   }
 
   // ================= PDF-Export (randlos A4, ohne Browser-Kopfzeilen) =================
-  function slug(s) {
-    return String(s || '').trim().replace(/[äÄ]/g, 'ae').replace(/[öÖ]/g, 'oe').replace(/[üÜ]/g, 'ue').replace(/ß/g, 'ss')
-      .replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+  function cleanName(s) {
+    return String(s || '').trim().replace(/[\\/:*?"<>|]+/g, ' ').replace(/ {2,}/g, ' ').slice(0, 60);
   }
   function makePdf(host, filename, fallbackAttr) {
     if (typeof html2pdf === 'undefined') {
-      // Bibliothek (noch) nicht geladen -> Druckdialog als Fallback
       if (fallbackAttr) document.body.setAttribute('data-print', fallbackAttr);
       else document.body.removeAttribute('data-print');
       window.print();
       return;
     }
+    var sheets = host.querySelectorAll('.sheet');
+    if (!sheets.length) return;
     var prevZoom = host.style.zoom;
     host.style.zoom = 1;
     document.body.classList.add('pdf-export-active');
     var opt = {
       margin: 0,
-      filename: filename,
       image: { type: 'jpeg', quality: 0.95 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], after: '.sheet:not(:last-child)' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     function done() {
       host.style.zoom = prevZoom;
       document.body.classList.remove('pdf-export-active');
     }
-    html2pdf().set(opt).from(host).save().then(done).catch(function (err) {
+    var worker = html2pdf().set(opt).from(sheets[0]).toPdf();
+    for (var i = 1; i < sheets.length; i++) {
+      (function (s) {
+        worker = worker.get('pdf').then(function (pdf) { pdf.addPage(); }).from(s).toContainer().toCanvas().toPdf();
+      })(sheets[i]);
+    }
+    worker.save(filename).then(done).catch(function () {
       done();
-      // Notfall: Druckdialog
       if (fallbackAttr) document.body.setAttribute('data-print', fallbackAttr);
       else document.body.removeAttribute('data-print');
       window.print();
@@ -1573,7 +1576,7 @@
 
   $('sepaPdfBtn').addEventListener('click', function () {
     renderSepa();
-    makePdf($('sepaPrintArea'), 'QWIC_SEPA-Mandat' + (val('s_hname') ? '_' + slug(val('s_hname')) : '') + '.pdf', 'sepa');
+    makePdf($('sepaPrintArea'), 'QWIC SEPA-Mandat' + (val('s_hname') ? ' ' + cleanName(val('s_hname')) : '') + '.pdf', 'sepa');
   });
 
   // ================= BREKR Vertrag =================
@@ -1829,12 +1832,12 @@
   });
   $('brekrPdfBtn').addEventListener('click', function () {
     renderBrekr();
-    makePdf($('brekrPrintArea'), 'BREKR_Haendlerkonditionen_' + bkYear() + (val('bk_firma') ? '_' + slug(val('bk_firma')) : '') + '.pdf', 'brekr');
+    makePdf($('brekrPrintArea'), 'BREKR Händlerkonditionen' + (val('bk_firma') ? ' ' + cleanName(val('bk_firma')) : '') + ' ' + bkYear() + '.pdf', 'brekr');
   });
 
   $('pdfBtn').addEventListener('click', function () {
     renderContract();
-    makePdf($('printArea'), 'QWIC_Partnervereinbarung_' + cYear() + (val('c_haendler') ? '_' + slug(val('c_haendler')) : '') + '.pdf', null);
+    makePdf($('printArea'), 'QWIC Partnervereinbarung ' + (cleanName(val('c_haendler')) || 'Haendler') + ' ' + cYear() + '.pdf', null);
   });
 
   makeSigPad('sigH', 'sigHClear', 'H');
